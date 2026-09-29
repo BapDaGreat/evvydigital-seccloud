@@ -1,0 +1,30 @@
+# Environment variables & API credentials (NEVER COMMIT)
+.env
+.env.*
+*.env
+secrets/
+*.pem
+*.key
+
+# Python virtual environment & cache
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+
+# Audit logs with transaction history
+logs/*.jsonl
+logs/*.log
+
+# IDE & OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Node & Vite build artifacts
+node_modules/
+dist/
+*.tsbuildinfo

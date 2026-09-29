@@ -1,1408 +1,1184 @@
 import React, { useState } from 'react';
 import {
-  ArrowUpRight,
-  ArrowRight,
-  Lock,
-  Play,
-  CheckCircle2,
-  MessageSquare,
-  ChevronRight,
-  TrendingUp,
-  Crosshair,
-  Zap,
-  X,
-} from 'lucide-react';
+  TactileSurface,
+  TactileButton,
+  AnalogNoiseOverlay,
+} from './TactileSurface';
 
-type PageId = 'home' | 'about' | 'results';
+const WHATSAPP_NUMBER = '447575203332'; // 07575 203332
+const DEFAULT_WA_MESSAGE =
+  "Hi Mark, I've been looking at TOPFORM and I'm interested in working with you.";
 
-interface TimelinePoint {
-  month: string;
-  label: string;
-  minutes: string;
-  rating: string;
-  status: string;
-  narrative: string;
-  barPct: number;
-}
+// Official Bim Pepple Press Conference Vimeo Embed (https://vimeo.com/1230904160)
+const BIM_PEPPLE_VIMEO_EMBED =
+  'https://player.vimeo.com/video/1230904160?h=26a94e858b&title=0&byline=0&portrait=0&autoplay=1';
 
-const JAN_TO_MAY_DATA: TimelinePoint[] = [
-  {
-    month: 'JAN',
-    label: 'FROZEN OUT // MATCHDAY SQUAD OMISSION',
-    minutes: '0 MIN',
-    rating: 'N/A',
-    status: 'BENCH / UNUSED SUB',
-    narrative:
-      'Dropped from the starting XI following a managerial change. Pressing hesitancy and second-guessing in the final third led to four consecutive unused substitute appearances.',
-    barPct: 6,
-  },
-  {
-    month: 'FEB',
-    label: 'NEURAL RESET // PRIVATE INTAKE INITIATED',
-    minutes: '142 MIN',
-    rating: '7.14',
-    status: 'IMPACT SUBSTITUTE',
-    narrative:
-      'Stripped away over-analysis before kickoff. Installed a 3-second in-game error reset protocol and pre-match autonomic state calibration. Scored decisive equalizer in 84th minute.',
-    barPct: 38,
-  },
-  {
-    month: 'MAR',
-    label: 'FIRST-XI LOCK // CHAMPIONS LEAGUE KNOCKOUTS',
-    minutes: '450 MIN',
-    rating: '7.82',
-    status: 'UNDISPUTED STARTER',
-    narrative:
-      'Started every fixture across domestic and European competition. Completed 91% of progressive carries into the penalty box; named Man of the Match twice.',
-    barPct: 74,
-  },
-  {
-    month: 'APR',
-    label: 'PEAK FLOW STATE // RUN-IN DOMINANCE',
-    minutes: '540 MIN',
-    rating: '8.35',
-    status: 'TALISMAN / CAPTAIN ARMBAND',
-    narrative:
-      '6 goal contributions in 6 matches during the high-pressure season run-in. Zero drop-off in decision speed between minute 1 and minute 90+5.',
-    barPct: 92,
-  },
-  {
-    month: 'MAY',
-    label: 'VOTED CLUB PLAYER OF THE YEAR',
-    minutes: '900+ MIN',
-    rating: '8.64',
-    status: 'PLAYER OF THE YEAR',
-    narrative:
-      'Completed a historic 16-week career reversal. Voted Player of the Season by both teammates and supporters, securing a new marquee contract tier.',
-    barPct: 100,
-  },
-];
+export const getWhatsAppUrl = (customMessage?: string) => {
+  const text = encodeURIComponent(customMessage || DEFAULT_WA_MESSAGE);
+  return `https://wa.me/${WHATSAPP_NUMBER}?text=${text}`;
+};
 
-interface CaseStudy {
+interface CareerStory {
   id: string;
-  code: string;
-  competition: string;
-  position: string;
-  headline: string;
-  subheadline: string;
-  beforeMetric: string;
-  afterMetric: string;
-  deltaLabel: string;
-  quote: string;
-  pillarsUsed: string[];
-  image: string;
+  index: string;
+  headlineLine1: string;
+  headlineLine2: string;
+  whenWeStarted: string[];
+  whereItWentIntro?: string;
+  whereItWentBullets?: string[];
+  whereItWentBody?: string;
+  summaryLine: string;
 }
 
-const CASE_STUDIES: CaseStudy[] = [
+const CAREER_STORIES: CareerStory[] = [
   {
-    id: 'cs-01',
-    code: 'DOSSIER // 01',
-    competition: 'PREMIER LEAGUE',
-    position: 'ATTACKING MIDFIELDER (TOP-6 CLUB)',
-    headline: 'ZERO GAME TIME IN JANUARY. PLAYER OF THE YEAR BY MAY.',
-    subheadline:
-      'From transfer-listed squad player in the winter window to the club’s most decisive performer across the final 18 fixtures.',
-    beforeMetric: '0 STARTS (JAN)',
-    afterMetric: '14 G/A · POTY (MAY)',
-    deltaLabel: '+340% PROGRESSIVE IMPACT',
-    quote:
-      '“Every coach tells you to be confident. Mark actually rewired what happens in my head in the 1.5 seconds before the ball arrives at my feet.”',
-    pillarsUsed: ['Matchday State Control', '3-Second Pitch Reset', '90+ Min Composure'],
-    image:
-      'https://images.unsplash.com/photo-1518091043644-c1d4457512c6?auto=format&fit=crop&w=1400&q=85',
+    id: 'story-01',
+    index: '01',
+    headlineLine1: 'RELEASED BY THREE PREMIER LEAGUE ACADEMIES.',
+    headlineLine2: "NOW PLAYING AT ONE OF EUROPE'S ELITE CLUBS.",
+    whenWeStarted: [
+      'He had been released by three Premier League academies and was rebuilding his career in the Championship.',
+    ],
+    whereItWentBody:
+      "He established himself as one of the outstanding young players in the Championship before moving on to one of Europe's elite clubs.",
+    summaryLine: 'From three academy releases to the highest levels of European football.',
   },
   {
-    id: 'cs-02',
-    code: 'DOSSIER // 02',
-    competition: 'UEFA CHAMPIONS LEAGUE',
-    position: 'CENTER FORWARD (#9)',
-    headline: '8-MATCH GOAL DROUGHT TO 11 GOALS IN 9 EUROPEAN & LEAGUE STARTS.',
-    subheadline:
-      'Eliminating penalty-box cortical tension and restoring instinctive first-time finishing under extreme media scrutiny.',
-    beforeMetric: '0.11 GOALS / 90',
-    afterMetric: '0.89 GOALS / 90',
-    deltaLabel: '+68% SHOT CONVERSION',
-    quote:
-      '“When the stadium is loud and you miss an early chance, the old me would hide for 20 minutes. Now I’m more dangerous on the very next phase.”',
-    pillarsUsed: ['Striker Instinct Protocol', 'Media Noise Isolation', 'High-xG Execution'],
-    image:
-      'https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&w=1400&q=85',
+    id: 'story-02',
+    index: '02',
+    headlineLine1: 'ZERO GAME TIME IN JANUARY.',
+    headlineLine2: 'PLAYER OF THE YEAR BY MAY.',
+    whenWeStarted: [
+      "Halfway through the season, he was at a Championship club and hadn't played a single minute.",
+      'His confidence was at rock bottom.',
+      'We started working together in January.',
+    ],
+    whereItWentIntro: 'By the end of that same season, he had won both:',
+    whereItWentBullets: ['Young Player of the Year.', 'Player of the Year.'],
+    summaryLine: 'From zero game time to two end-of-season awards in a matter of months.',
   },
   {
-    id: 'cs-03',
-    code: 'DOSSIER // 03',
-    competition: 'LA LIGA & INTERNATIONAL',
-    position: 'CENTRAL DEFENDER / VICE-CAPTAIN',
-    headline: 'POST-ACL RETURN TO TOP-1% DUEL WIN RATE IN EUROPE’S TOP FIVE LEAGUES.',
-    subheadline:
-      'Erasing subconscious physical hesitation after a 7-month layoff to command the high defensive line against elite transitions.',
-    beforeMetric: '54% AERIAL / DUELS',
-    afterMetric: '79.4% DUELS WON',
-    deltaLabel: 'TOP 0.5% IN EUROPE',
-    quote:
-      '“The physios cleared my knee in October, but Mark cleared my instinct in 14 days. I stopped protecting the leg and started dominating my zone again.”',
-    pillarsUsed: ['Post-Injury Fear Erasure', 'Command Presence', 'High-Line Scanning'],
-    image:
-      'https://images.unsplash.com/photo-1508098682722-e99c43a406b2?auto=format&fit=crop&w=1400&q=85',
+    id: 'story-03',
+    index: '03',
+    headlineLine1: 'CONSIDERING QUITTING FOOTBALL.',
+    headlineLine2: 'TWO SEASONS LATER: PREMIER LEAGUE & FULL INTERNATIONAL.',
+    whenWeStarted: [
+      "His career wasn't going where he'd hoped.",
+      'He was facing the prospect of dropping into League Two and was seriously considering walking away from football altogether.',
+    ],
+    whereItWentIntro: 'Two seasons later, he had become:',
+    whereItWentBullets: ['A Premier League player.', 'A full international.'],
+    summaryLine:
+      'From considering whether he had a future in the game to playing at the highest level of English football and representing his country.',
+  },
+  {
+    id: 'story-04',
+    index: '04',
+    headlineLine1: 'SIX MONTHS WITHOUT A GAME.',
+    headlineLine2: 'THEN A MULTI-MILLION-POUND PREMIER LEAGUE MOVE.',
+    whenWeStarted: [
+      "He had joined a League One club but couldn't get into the team.",
+      "For the first six months, he didn't play a single game.",
+    ],
+    whereItWentBody:
+      'By the end of the following season, his performances had earned him a move to the Premier League for a multi-million-pound fee.',
+    summaryLine:
+      'From struggling to get on the pitch in League One to becoming a Premier League player.',
   },
 ];
 
 export const TopformSite: React.FC = () => {
-  const [activePage, setActivePage] = useState<PageId>('home');
-  const [selectedMonthIdx, setSelectedMonthIdx] = useState<number>(4); // Default to MAY highlight
-  const [competitionFilter, setCompetitionFilter] = useState<string>('ALL');
-  const [intakeModalOpen, setIntakeModalOpen] = useState<boolean>(false);
-  const [intakeRole, setIntakeRole] = useState<'player' | 'agent'>('player');
-  const [intakeSubmitted, setIntakeSubmitted] = useState<boolean>(false);
-
-  const navigatePage = (page: PageId) => {
-    setActivePage(page);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  const activeTimeline = JAN_TO_MAY_DATA[selectedMonthIdx];
-
-  const filteredCases =
-    competitionFilter === 'ALL'
-      ? CASE_STUDIES
-      : CASE_STUDIES.filter((c) => c.competition.includes(competitionFilter));
+  const [bimVideoOpen, setBimVideoOpen] = useState(false);
 
   return (
     <div
-      className="min-h-screen bg-[#07080A] text-[#F4F5F7] relative overflow-x-hidden pb-24 sm:pb-0"
-      style={{ fontFamily: "'Inter', sans-serif" }}
+      className="relative min-h-screen bg-[#0c0d0e] text-[#f4f4f5] selection:bg-[#f4f4f5] selection:text-[#0c0d0e]"
+      style={{ fontFamily: "'Montserrat', sans-serif" }}
     >
-      {/* Subtle Film Grain Overlay */}
-      <div
-        className="fixed inset-0 pointer-events-none z-50"
-        style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.06'/%3E%3C/svg%3E")`,
-          opacity: 0.45,
-        }}
-      />
+      {/* Fine Analog SVG Grain Overlay */}
+      <AnalogNoiseOverlay />
 
-      {/* Architectural Top Navigation */}
-      <header className="sticky top-0 z-40 bg-[#07080A]/85 backdrop-blur-xl border-b border-white/10">
-        <div className="max-w-[1440px] mx-auto px-4 sm:px-8 h-16 sm:h-20 flex items-center justify-between">
-          {/* Brand Wordmark */}
-          <button
-            type="button"
-            onClick={() => navigatePage('home')}
-            className="flex items-center gap-3 text-left group cursor-pointer"
-          >
-            <div className="w-2.5 h-6 bg-[#D4FF00] transition-transform duration-200 group-hover:scale-y-110" />
+      {/* =====================================================================
+          MASTHEAD
+          Pure black #000000 to match the Hero canvas seamlessly, with a 2px
+          TOPFORM Blue top keyline and 1px hairline bottom divider.
+      ===================================================================== */}
+      <header className="relative z-30 bg-[#000000] text-[#f4f4f5] border-t-[2px] border-[#008BCE] border-b border-white/[0.07]">
+        <div className="max-w-[1320px] mx-auto px-6 sm:px-12 lg:px-16 h-20 sm:h-22 flex items-center justify-between">
+          <a href="#top" className="flex items-center gap-4 group" aria-label="TOPFORM">
+            <img
+              src="/assets/topform-roundel-white.png"
+              alt="TOPFORM"
+              className="w-9 h-9 sm:w-10 sm:h-10 object-contain"
+            />
             <div>
-              <span
-                className="text-xl sm:text-2xl tracking-tight text-white block leading-none"
-                style={{ fontFamily: "'Anton', sans-serif", letterSpacing: '0.03em' }}
-              >
-                TOPFORM<span className="text-[#D4FF00]">®</span>
+              <span className="text-base sm:text-lg font-bold tracking-[0.06em] text-[#ffffff] block leading-none">
+                TOPFORM
               </span>
-              <span
-                className="text-[9px] text-[#8A909E] uppercase block mt-0.5"
-                style={{ fontFamily: "'JetBrains Mono', monospace", letterSpacing: '0.18em' }}
-              >
-                ELITE FOOTBALL PERFORMANCE
+              <span className="text-[9px] text-zinc-400 tracking-[0.04em] block mt-1 font-normal">
+                PLAY AT YOUR BEST.{' '}
+                <strong className="font-bold text-[#ffffff]">MAKE YOUR BEST BETTER.</strong>
               </span>
             </div>
-          </button>
+          </a>
 
-          {/* Center Page Switcher */}
-          <nav className="hidden md:flex items-center gap-1 bg-white/[0.03] border border-white/10 p-1">
-            {(
-              [
-                { id: 'home', label: '01 // TOPFORM' },
-                { id: 'about', label: '02 // ABOUT MARK' },
-                { id: 'results', label: '03 // PLAYERS & RESULTS' },
-              ] as const
-            ).map((tab) => {
-              const active = activePage === tab.id;
-              return (
-                <button
-                  key={tab.id}
-                  type="button"
-                  onClick={() => navigatePage(tab.id)}
-                  className={`px-4 py-2 text-xs uppercase transition-all cursor-pointer ${
-                    active
-                      ? 'bg-[#D4FF00] text-[#07080A] font-semibold'
-                      : 'text-[#8A909E] hover:text-white'
-                  }`}
-                  style={{ fontFamily: "'JetBrains Mono', monospace", letterSpacing: '0.1em' }}
-                >
-                  {tab.label}
-                </button>
-              );
-            })}
-          </nav>
-
-          {/* Right Status + Private Intake Trigger */}
-          <div className="flex items-center gap-4">
-            <div
-              className="hidden lg:flex items-center gap-2 text-[11px] text-[#8A909E] uppercase"
-              style={{ fontFamily: "'JetBrains Mono', monospace" }}
-            >
-              <span className="w-2 h-2 rounded-full bg-[#D4FF00] animate-pulse" />
-              <span>ROSTER INTAKE: 2 PRIVATE SLOTS</span>
-            </div>
-
-            <button
-              type="button"
-              onClick={() => {
-                setIntakeSubmitted(false);
-                setIntakeModalOpen(true);
-              }}
-              className="bg-white text-[#07080A] hover:bg-[#D4FF00] transition-colors duration-200 px-4 sm:px-5 py-2.5 text-xs font-bold uppercase tracking-wider flex items-center gap-2 cursor-pointer"
-              style={{ fontFamily: "'JetBrains Mono', monospace" }}
-            >
-              <span>PRIVATE CONSULTATION</span>
-              <ArrowUpRight className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
-
-        {/* Mobile Sub-Navigation Strip */}
-        <div className="flex md:hidden border-t border-white/10 bg-[#0A0C10]">
-          {(
-            [
-              { id: 'home', label: 'TOPFORM' },
-              { id: 'about', label: 'ABOUT MARK' },
-              { id: 'results', label: 'PLAYERS & RESULTS' },
-            ] as const
-          ).map((tab) => {
-            const active = activePage === tab.id;
-            return (
-              <button
-                key={tab.id}
-                type="button"
-                onClick={() => navigatePage(tab.id)}
-                className={`flex-1 py-2.5 text-[11px] uppercase tracking-wider border-b-2 transition-colors ${
-                  active
-                    ? 'border-[#D4FF00] text-[#D4FF00] font-semibold bg-white/[0.03]'
-                    : 'border-transparent text-[#8A909E]'
-                }`}
-                style={{ fontFamily: "'JetBrains Mono', monospace" }}
-              >
-                {tab.label}
-              </button>
-            );
-          })}
+          <a
+            href={getWhatsAppUrl()}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-xs font-semibold tracking-[0.14em] uppercase text-[#ffffff] pb-1 border-b border-white/25 hover:border-[#008BCE] transition-colors"
+          >
+            WORK WITH MARK
+          </a>
         </div>
       </header>
 
-      {/* =====================================================================
-          PAGE 1: TOPFORM (HOME / MAIN LONG-FORM PAGE)
-      ===================================================================== */}
-      {activePage === 'home' && (
-        <main>
-          {/* [01 // HERO SECTION] */}
-          <section className="relative min-h-[90vh] flex flex-col justify-between border-b border-white/10 overflow-hidden">
-            {/* Floodlit Atmospheric Stadium Backdrop */}
-            <div className="absolute inset-0 z-0">
+      <main id="top" className="relative z-10">
+        {/* ===================================================================
+            01 | HERO SECTION
+            Pure #000000 background so the monochrome player photography melts
+            seamlessly with zero horizontal seam or 3D background clutter.
+        =================================================================== */}
+        <section className="relative bg-[#000000] text-[#f4f4f5] pb-20 sm:pb-28 border-b border-white/[0.07]">
+          {/* Framed Monochrome Player Lineup with seamless edge feathering */}
+          <div className="relative max-w-[1280px] mx-auto pt-4 sm:pt-6 px-4 sm:px-8">
+            <div className="relative overflow-hidden">
               <img
-                src="https://images.unsplash.com/photo-1522778119026-d647f0596c20?auto=format&fit=crop&w=2000&q=85"
-                alt="Stadium Floodlights Atmosphere"
+                src="/assets/topform-hero-editorial-bw.jpg"
+                alt="Gabe Osho, Fabio Carvalho, Bim Pepple and Reiss Nelson"
                 fetchPriority="high"
-                className="w-full h-full object-cover object-center grayscale contrast-125 opacity-35 scale-105"
+                width={1983}
+                height={793}
+                className="w-full max-h-[54vh] object-contain object-top block mx-auto"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#07080A] via-[#07080A]/65 to-[#07080A]/80" />
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_30%,rgba(212,255,0,0.09),transparent_55%)]" />
+              {/* Seamless bottom gradient into #000000 so there is never a hard cut */}
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-x-0 bottom-0 h-20 sm:h-28 bg-gradient-to-t from-[#000000] via-[#000000]/70 to-transparent"
+              />
             </div>
+          </div>
 
-            {/* Exposed Architectural Grid Overlay */}
-            <div className="max-w-[1440px] w-full mx-auto px-4 sm:px-8 pt-8 sm:pt-12 pb-12 sm:pb-16 relative z-10 flex-1 flex flex-col justify-between">
-              {/* Top Telemetry Meta Row */}
-              <div className="flex flex-wrap items-center justify-between gap-4 border-b border-white/10 pb-5">
-                <div
-                  className="flex items-center gap-3 text-xs text-[#8A909E] uppercase"
-                  style={{ fontFamily: "'JetBrains Mono', monospace", letterSpacing: '0.14em' }}
-                >
-                  <span className="px-2 py-0.5 bg-[#D4FF00]/15 text-[#D4FF00] border border-[#D4FF00]/30">
-                    CHAMPS LEAGUE // PREMIER LEAGUE
-                  </span>
-                  <span>1-ON-1 COGNITIVE & COMPETITIVE ARCHITECTURE</span>
-                </div>
-                <div
-                  className="text-xs text-[#8A909E] uppercase hidden sm:block"
-                  style={{ fontFamily: "'JetBrains Mono', monospace", letterSpacing: '0.14em' }}
-                >
-                  [STRICT NDA · DIRECT PLAYER & AGENT ACCESS]
-                </div>
-              </div>
-
-              {/* Primary Graphic Anchor Copy */}
-              <div className="my-auto py-10 sm:py-16">
-                <p
-                  className="text-xs sm:text-sm uppercase text-[#D4FF00] mb-4 tracking-widest"
-                  style={{ fontFamily: "'JetBrains Mono', monospace", letterSpacing: '0.2em' }}
-                >
-                  // 01 — THE STANDARD OF ELITE EXECUTION
-                </p>
-
+          {/* Balanced 12-Column Editorial Hero Grid */}
+          <div className="relative z-10 max-w-[1320px] mx-auto px-6 sm:px-12 lg:px-16 pt-4 sm:pt-6">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-end">
+              <div className="lg:col-span-7">
                 <h1
-                  className="uppercase leading-[0.88] tracking-[-0.02em] text-white select-none"
-                  style={{
-                    fontFamily: "'Anton', sans-serif",
-                    fontSize: 'clamp(3.1rem, 8.2vw, 7.75rem)',
-                  }}
+                  className="font-bold text-[#ffffff] leading-[1.06] tracking-tight"
+                  style={{ fontSize: 'clamp(2.15rem, 4.1vw, 3.65rem)' }}
                 >
-                  <span className="block">PLAY CONSISTENTLY</span>
-                  <span className="block text-white/95">AT YOUR BEST.</span>
-                  <span className="block sm:pl-[8%] mt-1 sm:mt-2 text-[#D4FF00]">
-                    MAKE YOUR BEST EVEN BETTER.
-                  </span>
+                  Play consistently at your best.
+                  <span className="block mt-1.5 text-[#d4d4d8]">Make your best even better.</span>
                 </h1>
-
-                {/* Editorial Sub-Grid */}
-                <div className="mt-8 sm:mt-12 grid grid-cols-1 lg:grid-cols-12 gap-8 items-end">
-                  <div className="lg:col-span-6">
-                    <p className="text-base sm:text-xl text-[#C4C9D4] leading-relaxed font-normal max-w-2xl">
-                      At the highest level of professional football, physical conditioning is table
-                      stakes. <strong className="text-white font-semibold">TOPFORM</strong>{' '}
-                      engineers the cognitive speed, matchday composure, and ruthless 90-minute
-                      consistency that separate squad players from generational performers.
-                    </p>
-                  </div>
-
-                  <div className="lg:col-span-6 flex flex-col sm:flex-row items-stretch sm:items-center lg:justify-end gap-4">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setIntakeSubmitted(false);
-                        setIntakeModalOpen(true);
-                      }}
-                      className="bg-[#D4FF00] text-[#07080A] hover:bg-white transition-all duration-200 px-7 py-4 font-bold uppercase text-xs sm:text-sm tracking-wider flex items-center justify-center gap-3 cursor-pointer"
-                      style={{ fontFamily: "'JetBrains Mono', monospace" }}
-                    >
-                      <span>INITIATE PRIVATE CONSULTATION</span>
-                      <ArrowRight className="w-4 h-4" />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => navigatePage('results')}
-                      className="border border-white/25 bg-white/[0.03] hover:bg-white/10 text-white transition-all duration-200 px-7 py-4 font-semibold uppercase text-xs sm:text-sm tracking-wider flex items-center justify-center gap-3 cursor-pointer"
-                      style={{ fontFamily: "'JetBrains Mono', monospace" }}
-                    >
-                      <Play className="w-3.5 h-3.5 fill-current text-[#D4FF00]" />
-                      <span>INSPECT PLAYER DOSSIERS</span>
-                    </button>
-                  </div>
-                </div>
               </div>
 
-              {/* Bottom Hero Telemetry Bar */}
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 pt-6 border-t border-white/10">
-                {[
-                  { label: 'CLIENT TIER', value: 'TOP-5 EUROPEAN LEAGUES' },
-                  { label: 'AVG RATING DELTA', value: '+1.18 MATCH RATING (12 WKS)' },
-                  { label: 'CONFIDENTIALITY', value: '100% PRIVATE // OFF-CLUB RECORD' },
-                  { label: 'DIRECT ACCESS', value: 'WHATSAPP & MATCHDAY VOICE NOTE' },
-                ].map((stat) => (
-                  <div key={stat.label} className="border-l border-white/15 pl-3">
-                    <span
-                      className="text-[10px] text-[#8A909E] uppercase block"
-                      style={{ fontFamily: "'JetBrains Mono', monospace", letterSpacing: '0.12em' }}
-                    >
-                      {stat.label}
-                    </span>
-                    <span className="text-xs sm:text-sm font-semibold text-white mt-0.5 block">
-                      {stat.value}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </section>
-
-          {/* [02 // THE PERFORMANCE GAP — EDITORIAL MANIFESTO] */}
-          <section className="border-b border-white/10 py-20 sm:py-28 bg-[#07080A]">
-            <div className="max-w-[1440px] mx-auto px-4 sm:px-8">
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
-                <div className="lg:col-span-4 flex flex-col justify-between border-b lg:border-b-0 lg:border-r border-white/10 pb-8 lg:pb-0 lg:pr-8">
-                  <div>
-                    <span
-                      className="text-xs text-[#D4FF00] uppercase block mb-3"
-                      style={{ fontFamily: "'JetBrains Mono', monospace", letterSpacing: '0.16em' }}
-                    >
-                      // 02 — THE UNSEEN MARGIN
-                    </span>
-                    <h2
-                      className="uppercase text-3xl sm:text-5xl leading-[0.95] text-white"
-                      style={{ fontFamily: "'Anton', sans-serif" }}
-                    >
-                      WHY ELITE TALENT STALLS UNDER FLOODLIGHTS.
-                    </h2>
-                  </div>
-
-                  <div className="mt-8 pt-6 border-t border-white/10">
-                    <p
-                      className="text-xs text-[#8A909E] uppercase leading-relaxed"
-                      style={{ fontFamily: "'JetBrains Mono', monospace" }}
-                    >
-                      NOT CLINICAL PSYCHOLOGY. NOT GENERIC MOTIVATION. PURE COMPETITIVE EXECUTION
-                      BUILT FOR THE 90 MINUTES THAT DEFINE YOUR MARKET VALUE.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="lg:col-span-8 lg:pl-6 space-y-10">
-                  <p className="text-xl sm:text-3xl text-white font-light leading-snug">
-                    You already train like an elite athlete. Your VO2 max, sprint recovery, and
-                    tactical literacy are in the top 0.01% on earth. Yet on Saturday at 15:00 — or
-                    Tuesday night under Champions League floodlights —{' '}
-                    <span className="text-[#D4FF00] font-medium">
-                      a half-second of cognitive hesitation costs you the starting shirt.
-                    </span>
-                  </p>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 pt-4">
-                    {[
-                      {
-                        idx: '01',
-                        title: 'THE SELECTION TRAP',
-                        desc: 'When dropped or rotated, most players force passes and over-try in 15-minute cameos—confirming the manager’s doubts.',
-                      },
-                      {
-                        idx: '02',
-                        title: 'CORTICAL INTERFERENCE',
-                        desc: 'Playing to avoid mistakes rather than playing on instinct adds 0.3s to your first touch and scanning speed.',
-                      },
-                      {
-                        idx: '03',
-                        title: 'CLUB POLITICS & NOISE',
-                        desc: 'You cannot tell a club psychologist you doubt the manager’s system. TOPFORM operates 100% privately in your corner.',
-                      },
-                    ].map((card) => (
-                      <div
-                        key={card.idx}
-                        className="bg-[#0E1014] border border-white/10 p-6 flex flex-col justify-between hover:border-white/30 transition-colors"
-                      >
-                        <span
-                          className="text-xs text-[#D4FF00] mb-6 block"
-                          style={{ fontFamily: "'JetBrains Mono', monospace" }}
-                        >
-                          [{card.idx}]
-                        </span>
-                        <div>
-                          <h3
-                            className="text-xl uppercase text-white mb-2"
-                            style={{ fontFamily: "'Anton', sans-serif", letterSpacing: '0.02em' }}
-                          >
-                            {card.title}
-                          </h3>
-                          <p className="text-sm text-[#8A909E] leading-relaxed">{card.desc}</p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </section>
-
-          {/* [03 // TRANSFORMATIONAL PROOF POINT / INTERACTIVE CASE STUDY ANCHOR] */}
-          <section className="border-b border-white/10 py-20 sm:py-32 bg-[#0B0D11] relative overflow-hidden">
-            <div className="max-w-[1440px] mx-auto px-4 sm:px-8 relative z-10">
-              {/* Section Eyebrow */}
-              <div className="flex flex-wrap items-center justify-between gap-4 mb-10">
-                <span
-                  className="text-xs text-[#D4FF00] uppercase"
-                  style={{ fontFamily: "'JetBrains Mono', monospace", letterSpacing: '0.16em' }}
-                >
-                  // 03 — VERIFIED CAREER TRAJECTORY SHIFT [PREMIER LEAGUE CASE STUDY]
-                </span>
-                <span
-                  className="text-xs text-[#8A909E] uppercase"
-                  style={{ fontFamily: "'JetBrains Mono', monospace" }}
-                >
-                  DURATION: 16 WEEKS (JAN → MAY)
-                </span>
-              </div>
-
-              {/* CORE ANCHOR COPY #2 — Kinetic Split Typography */}
-              <div className="border-y border-white/15 py-10 sm:py-14 mb-12">
-                <h2
-                  className="uppercase leading-[0.9] tracking-[-0.02em]"
-                  style={{
-                    fontFamily: "'Anton', sans-serif",
-                    fontSize: 'clamp(2.6rem, 7vw, 6.75rem)',
-                  }}
-                >
-                  <span
-                    className="block transition-opacity duration-300"
-                    style={{
-                      WebkitTextStroke: '1.5px rgba(244, 245, 247, 0.45)',
-                      color: selectedMonthIdx === 0 ? '#F4F5F7' : 'transparent',
-                    }}
-                  >
-                    ZERO GAME TIME IN JANUARY.
-                  </span>
-                  <span className="block text-[#D4FF00] mt-2">
-                    PLAYER OF THE YEAR BY MAY.
-                  </span>
-                </h2>
-              </div>
-
-              {/* Interactive Month-by-Month Telemetry Scrubber */}
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
-                {/* Left Column: Interactive Timeline Selector */}
-                <div className="lg:col-span-5 flex flex-col justify-between bg-[#07080A] border border-white/10 p-6 sm:p-8">
-                  <div>
-                    <span
-                      className="text-[11px] text-[#8A909E] uppercase block mb-4"
-                      style={{ fontFamily: "'JetBrains Mono', monospace", letterSpacing: '0.14em' }}
-                    >
-                      SELECT MONTH TO INSPECT TELEMETRY:
-                    </span>
-
-                    <div className="grid grid-cols-5 gap-2 mb-8">
-                      {JAN_TO_MAY_DATA.map((item, idx) => {
-                        const isSelected = idx === selectedMonthIdx;
-                        return (
-                          <button
-                            key={item.month}
-                            type="button"
-                            onClick={() => setSelectedMonthIdx(idx)}
-                            className={`py-3 text-xs font-bold uppercase border transition-all cursor-pointer ${
-                              isSelected
-                                ? 'bg-[#D4FF00] text-[#07080A] border-[#D4FF00]'
-                                : 'bg-[#0E1014] text-white/70 border-white/10 hover:border-white/30'
-                            }`}
-                            style={{ fontFamily: "'JetBrains Mono', monospace" }}
-                          >
-                            {item.month}
-                          </button>
-                        );
-                      })}
-                    </div>
-
-                    <div className="space-y-4">
-                      <div
-                        className="text-xs text-[#D4FF00] uppercase"
-                        style={{ fontFamily: "'JetBrains Mono', monospace" }}
-                      >
-                        {activeTimeline.label}
-                      </div>
-                      <p className="text-base sm:text-lg text-[#E2E6EE] leading-relaxed">
-                        {activeTimeline.narrative}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Trajectory Progress Bar */}
-                  <div className="mt-8 pt-6 border-t border-white/10">
-                    <div className="flex justify-between text-xs mb-2" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
-                      <span className="text-[#8A909E]">PERFORMANCE & TRUST INDEX</span>
-                      <span className="text-[#D4FF00] font-bold">{activeTimeline.barPct}%</span>
-                    </div>
-                    <div className="w-full h-2 bg-white/10 overflow-hidden">
-                      <div
-                        className="h-full bg-[#D4FF00] transition-all duration-500"
-                        style={{ width: `${activeTimeline.barPct}%` }}
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Right Column: Live Telemetry Readout & Visual Dossier */}
-                <div className="lg:col-span-7 bg-[#07080A] border border-white/10 p-6 sm:p-10 flex flex-col justify-between relative overflow-hidden">
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 border-b border-white/10 pb-8">
-                    <div>
-                      <span
-                        className="text-[11px] text-[#8A909E] uppercase block"
-                        style={{ fontFamily: "'JetBrains Mono', monospace" }}
-                      >
-                        MONTHLY PITCH TIME
-                      </span>
-                      <span
-                        className="text-3xl sm:text-5xl text-white block mt-1"
-                        style={{ fontFamily: "'Anton', sans-serif" }}
-                      >
-                        {activeTimeline.minutes}
-                      </span>
-                    </div>
-                    <div>
-                      <span
-                        className="text-[11px] text-[#8A909E] uppercase block"
-                        style={{ fontFamily: "'JetBrains Mono', monospace" }}
-                      >
-                        AVG MATCH RATING
-                      </span>
-                      <span
-                        className="text-3xl sm:text-5xl text-[#D4FF00] block mt-1"
-                        style={{ fontFamily: "'Anton', sans-serif" }}
-                      >
-                        {activeTimeline.rating}
-                      </span>
-                    </div>
-                    <div>
-                      <span
-                        className="text-[11px] text-[#8A909E] uppercase block"
-                        style={{ fontFamily: "'JetBrains Mono', monospace" }}
-                      >
-                        SQUAD STATUS
-                      </span>
-                      <span
-                        className="text-xl sm:text-2xl text-white block mt-2"
-                        style={{ fontFamily: "'Anton', sans-serif" }}
-                      >
-                        {activeTimeline.status}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Direct Player Quote inside Proof Block */}
-                  <div className="my-8">
-                    <blockquote className="text-lg sm:text-2xl font-light italic text-white/90 leading-relaxed">
-                      “In January I had my agent looking for a loan exit because the manager
-                      wouldn’t even look at me in training. By May, the entire stadium was singing
-                      my name as I lifted the Player of the Year trophy. Mark didn’t change my
-                      technique — he unlocked the version of me that plays without fear.”
-                    </blockquote>
-                    <div
-                      className="mt-4 flex items-center gap-3 text-xs text-[#8A909E] uppercase"
-                      style={{ fontFamily: "'JetBrains Mono', monospace" }}
-                    >
-                      <span className="w-2 h-2 bg-[#D4FF00]" />
-                      <span>PREMIER LEAGUE FIRST-TEAM MIDFIELDER (IDENTITY PROTECTED UNDER NDA)</span>
-                    </div>
-                  </div>
-
-                  <div className="flex flex-wrap items-center justify-between gap-4 pt-6 border-t border-white/10">
-                    <span
-                      className="text-xs text-[#8A909E]"
-                      style={{ fontFamily: "'JetBrains Mono', monospace" }}
-                    >
-                      VERIFIED OPTA / WYScout PERFORMANCE SHIFT
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => navigatePage('results')}
-                      className="text-xs text-[#D4FF00] hover:underline uppercase flex items-center gap-1.5 cursor-pointer"
-                      style={{ fontFamily: "'JetBrains Mono', monospace" }}
-                    >
-                      <span>VIEW ALL PLAYER CASE STUDIES</span>
-                      <ArrowRight className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </section>
-
-          {/* [04 // THE 3-PILLAR HIGH-PERFORMANCE ARCHITECTURE] */}
-          <section className="border-b border-white/10 py-20 sm:py-28 bg-[#07080A]">
-            <div className="max-w-[1440px] mx-auto px-4 sm:px-8">
-              <div className="flex flex-col md:flex-row md:items-end justify-between mb-14 gap-6">
-                <div>
-                  <span
-                    className="text-xs text-[#D4FF00] uppercase block mb-3"
-                    style={{ fontFamily: "'JetBrains Mono', monospace", letterSpacing: '0.16em' }}
-                  >
-                    // 04 — THE TOPFORM SYSTEM
-                  </span>
-                  <h2
-                    className="uppercase text-4xl sm:text-6xl leading-[0.92] text-white"
-                    style={{ fontFamily: "'Anton', sans-serif" }}
-                  >
-                    ENGINEERED FOR MATCHDAY DOMINANCE.
-                  </h2>
-                </div>
-                <p className="text-sm text-[#8A909E] max-w-md">
-                  Zero classroom lectures. Zero generic worksheets. Every protocol is tailored to
-                  your position, your manager’s tactical demands, and your upcoming fixture list.
+              <div className="lg:col-span-5 lg:pb-1">
+                <p className="text-base sm:text-lg text-zinc-400 font-normal leading-[1.65] mb-8">
+                  Private 1-to-1 performance coaching and bespoke Off-Pitch Training for
+                  professional footballers.
                 </p>
-              </div>
 
-              <div className="grid grid-cols-1 lg:grid-cols-3 border border-white/10">
-                {[
-                  {
-                    num: 'PILLAR // 01',
-                    icon: Crosshair,
-                    title: 'PRE-MATCH AUTONOMIC CALIBRATION',
-                    subtitle: 'OWN THE TUNNEL BEFORE KICKOFF',
-                    points: [
-                      'Eliminate pre-match overthinking and nervous energy drain 24 hours prior to kickoff',
-                      'Custom 90-second tunnel lock-in routine tailored to your nervous system profile',
-                      'Enter minute 01:00 with the composure and visual scanning speed of minute 45:00',
-                    ],
-                  },
-                  {
-                    num: 'PILLAR // 02',
-                    icon: Zap,
-                    title: 'THE 3-SECOND IN-GAME RESET',
-                    subtitle: 'IMMUNITY TO MISTAKES & CROWD NOISE',
-                    points: [
-                      'Neuro-mechanical trigger to flush a misplaced pass or missed chance in under 3 seconds',
-                      'Prevent single errors from snowballing into a 20-minute invisible spell',
-                      'Stay ruthlessly demanding of the ball in high-pressure phases',
-                    ],
-                  },
-                  {
-                    num: 'PILLAR // 03',
-                    icon: TrendingUp,
-                    title: '90-MINUTE EXECUTIVE DOMINANCE',
-                    subtitle: 'CLUTCH DECISION-MAKING IN MINUTES 75–90+',
-                    points: [
-                      'Maintain cognitive sharpness when physical lactate thresholds peak late in the second half',
-                      'Post-match tactical & mental debrief via direct WhatsApp voice notes within 12 hours',
-                      'Mid-season contract, transfer window, and managerial transition armor',
-                    ],
-                  },
-                ].map((pillar, i) => {
-                  const IconComponent = pillar.icon;
-                  return (
-                    <div
-                      key={pillar.num}
-                      className={`p-8 sm:p-10 bg-[#0A0C10] flex flex-col justify-between ${
-                        i < 2 ? 'border-b lg:border-b-0 lg:border-r border-white/10' : ''
-                      }`}
-                    >
-                      <div>
-                        <div className="flex items-center justify-between mb-8">
-                          <span
-                            className="text-xs text-[#D4FF00] uppercase"
-                            style={{ fontFamily: "'JetBrains Mono', monospace" }}
-                          >
-                            {pillar.num}
-                          </span>
-                          <IconComponent className="w-5 h-5 text-[#D4FF00]" />
-                        </div>
-
-                        <h3
-                          className="text-2xl sm:text-3xl uppercase text-white leading-tight mb-2"
-                          style={{ fontFamily: "'Anton', sans-serif" }}
-                        >
-                          {pillar.title}
-                        </h3>
-                        <p
-                          className="text-xs text-[#8A909E] uppercase mb-8"
-                          style={{ fontFamily: "'JetBrains Mono', monospace" }}
-                        >
-                          {pillar.subtitle}
-                        </p>
-
-                        <ul className="space-y-4">
-                          {pillar.points.map((pt) => (
-                            <li key={pt} className="flex items-start gap-3 text-sm text-[#C4C9D4]">
-                              <CheckCircle2 className="w-4 h-4 text-[#D4FF00] shrink-0 mt-0.5" />
-                              <span>{pt}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-
-                      <div className="mt-10 pt-6 border-t border-white/10 flex items-center justify-between text-xs text-[#8A909E]">
-                        <span style={{ fontFamily: "'JetBrains Mono', monospace" }}>
-                          DELIVERY: 1-ON-1 PRIVATE
-                        </span>
-                        <span className="text-white font-semibold">BESPOKE PROTOCOL</span>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          </section>
-
-          {/* [05 // AUTHORITY BRIDGE TO MARK & DIRECT PRIVATE INTAKE] */}
-          <section className="py-20 sm:py-28 bg-[#07080A]">
-            <div className="max-w-[1440px] mx-auto px-4 sm:px-8">
-              <div className="grid grid-cols-1 lg:grid-cols-12 border border-white/15 bg-[#0E1014]">
-                {/* Left: About Mark Teaser */}
-                <div className="lg:col-span-6 p-8 sm:p-12 border-b lg:border-b-0 lg:border-r border-white/10 flex flex-col justify-between">
-                  <div>
-                    <span
-                      className="text-xs text-[#D4FF00] uppercase block mb-3"
-                      style={{ fontFamily: "'JetBrains Mono', monospace", letterSpacing: '0.16em' }}
-                    >
-                      // 05 — THE ARCHITECT BEHIND TOPFORM
-                    </span>
-                    <h3
-                      className="uppercase text-3xl sm:text-5xl text-white leading-[0.94] mb-6"
-                      style={{ fontFamily: "'Anton', sans-serif" }}
-                    >
-                      MARK: THE PRIVATE PERFORMANCE PARTNER TO FOOTBALL’S 1%.
-                    </h3>
-                    <p className="text-base text-[#C4C9D4] leading-relaxed mb-6">
-                      Trusted behind closed doors by Champions League winners, Premier League
-                      captains, and leading FIFA-licensed agencies. Mark operates outside club
-                      structures so players have an uncompromised, confidential edge.
-                    </p>
-                  </div>
-
-                  <div className="flex flex-wrap items-center gap-4 pt-6 border-t border-white/10">
-                    <button
-                      type="button"
-                      onClick={() => navigatePage('about')}
-                      className="text-xs uppercase font-bold text-[#D4FF00] flex items-center gap-2 hover:underline cursor-pointer"
-                      style={{ fontFamily: "'JetBrains Mono', monospace" }}
-                    >
-                      <span>READ MARK’S FULL PEDIGREE & PHILOSOPHY</span>
-                      <ArrowRight className="w-4 h-4" />
-                    </button>
-                  </div>
-                </div>
-
-                {/* Right: High-Conversion Private Intake Box */}
-                <div className="lg:col-span-6 p-8 sm:p-12 bg-[#07080A] flex flex-col justify-between">
-                  <div>
-                    <div className="flex items-center justify-between mb-4">
-                      <span
-                        className="text-xs text-[#8A909E] uppercase"
-                        style={{ fontFamily: "'JetBrains Mono', monospace" }}
-                      >
-                        DIRECT WHATSAPP / IMESSAGE CONCIERGE
-                      </span>
-                      <Lock className="w-4 h-4 text-[#D4FF00]" />
-                    </div>
-                    <h3
-                      className="uppercase text-3xl sm:text-5xl text-white leading-[0.94] mb-4"
-                      style={{ fontFamily: "'Anton', sans-serif" }}
-                    >
-                      SECURE YOUR PRIVATE CONSULTATION.
-                    </h3>
-                    <p className="text-sm text-[#8A909E] leading-relaxed mb-8">
-                      To protect matchday availability for existing roster clients, Mark works with
-                      a strictly capped number of professional players each season. Direct inquiries
-                      from players, agents, and sporting directors are handled personally.
-                    </p>
-                  </div>
-
-                  <div className="space-y-3">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setIntakeRole('player');
-                        setIntakeSubmitted(false);
-                        setIntakeModalOpen(true);
-                      }}
-                      className="w-full py-4 px-6 bg-[#D4FF00] text-[#07080A] hover:bg-white font-bold text-xs sm:text-sm uppercase tracking-wider flex items-center justify-between transition-colors cursor-pointer"
-                      style={{ fontFamily: "'JetBrains Mono', monospace" }}
-                    >
-                      <span>I AM A PROFESSIONAL PLAYER — REQUEST PRIVATE CALL</span>
-                      <ArrowUpRight className="w-4 h-4" />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setIntakeRole('agent');
-                        setIntakeSubmitted(false);
-                        setIntakeModalOpen(true);
-                      }}
-                      className="w-full py-4 px-6 bg-white/[0.04] hover:bg-white/10 text-white border border-white/15 font-semibold text-xs sm:text-sm uppercase tracking-wider flex items-center justify-between transition-colors cursor-pointer"
-                      style={{ fontFamily: "'JetBrains Mono', monospace" }}
-                    >
-                      <span>I AM AN AGENT / CLUB REPRESENTATIVE — INQUIRE FOR CLIENT</span>
-                      <ChevronRight className="w-4 h-4 text-[#D4FF00]" />
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </section>
-        </main>
-      )}
-
-      {/* =====================================================================
-          PAGE 2: ABOUT MARK
-      ===================================================================== */}
-      {activePage === 'about' && (
-        <main className="py-14 sm:py-24">
-          <div className="max-w-[1440px] mx-auto px-4 sm:px-8">
-            {/* Header */}
-            <div className="border-b border-white/10 pb-12 mb-14">
-              <span
-                className="text-xs text-[#D4FF00] uppercase block mb-3"
-                style={{ fontFamily: "'JetBrains Mono', monospace", letterSpacing: '0.16em' }}
-              >
-                // PAGE 02 — AUTHORITY & PEDIGREE
-              </span>
-              <h1
-                className="uppercase leading-[0.9] text-white"
-                style={{
-                  fontFamily: "'Anton', sans-serif",
-                  fontSize: 'clamp(3rem, 7.5vw, 6.8rem)',
-                }}
-              >
-                BUILT FOR THE LOCKER ROOM.
-                <span className="block text-[#D4FF00]">TRUSTED IN THE TUNNEL.</span>
-              </h1>
-            </div>
-
-            {/* Bio Grid */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 mb-20">
-              <div className="lg:col-span-5">
-                <div className="relative border border-white/15 bg-[#0E1014] overflow-hidden aspect-[4/5]">
-                  <img
-                    src="https://images.unsplash.com/photo-1517466787929-bc90951d0974?auto=format&fit=crop&w=1200&q=85"
-                    alt="Mark — Elite Football Performance Specialist"
-                    className="w-full h-full object-cover grayscale contrast-125 opacity-80"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#07080A] via-transparent to-transparent" />
-                  <div className="absolute bottom-6 left-6 right-6 border-t border-white/20 pt-4">
-                    <span
-                      className="text-xs text-[#D4FF00] uppercase block"
-                      style={{ fontFamily: "'JetBrains Mono', monospace" }}
-                    >
-                      MARK // FOUNDER, TOPFORM®
-                    </span>
-                    <span className="text-sm text-white/85 block mt-1">
-                      Private Performance Advisor to Premier League, Champions League &
-                      International Footballers
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="lg:col-span-7 flex flex-col justify-between space-y-8">
-                <div className="space-y-6">
-                  <h2
-                    className="text-2xl sm:text-4xl uppercase text-white leading-tight"
-                    style={{ fontFamily: "'Anton', sans-serif" }}
+                <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6">
+                  <TactileButton
+                    href={getWhatsAppUrl()}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    variant="alabaster"
+                    className="w-fit"
                   >
-                    “PLAYERS DON’T NEED ANOTHER LECTURE ON MINDSET. THEY NEED A COMPETITIVE WEAPON
-                    THAT WORKS AT 200 BPM UNDER 60,000 PEOPLE.”
-                  </h2>
-                  <p className="text-base sm:text-lg text-[#C4C9D4] leading-relaxed">
-                    Modern professional footballers are surrounded by analysts, sports scientists,
-                    and club staff — yet when form dips, transfer pressure mounts, or a new manager
-                    arrives, the player is functionally alone. Inside a club, everything you say
-                    can influence team selection.
-                  </p>
-                  <p className="text-base sm:text-lg text-[#C4C9D4] leading-relaxed">
-                    Mark founded <strong className="text-white">TOPFORM</strong> to give elite
-                    players an F1-grade performance engineer solely dedicated to their individual
-                    career trajectory. Combining applied neuro-performance, high-pressure decision
-                    architecture, and direct match-by-match calibration, Mark’s work is measured in
-                    one currency only: <strong className="text-[#D4FF00]">what happens on the pitch.</strong>
-                  </p>
-                </div>
-
-                {/* Key Credentials Matrix */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-6 border-t border-white/10">
-                  {[
-                    {
-                      k: '100% PLAYER-ALIGNED',
-                      v: 'Retained privately by players and agencies — never reporting back to club coaching staff.',
-                    },
-                    {
-                      k: 'MATCHWEEK RHYTHM',
-                      v: 'Direct WhatsApp integration timed around MD-2, MD-1, Kickoff, and MD+1 recovery.',
-                    },
-                    {
-                      k: 'PROVEN AT THE SUMMIT',
-                      v: 'Track record across Premier League, UEFA Champions League, La Liga, and World Cup qualifiers.',
-                    },
-                    {
-                      k: 'ZERO FLUFF MANDATE',
-                      v: 'Every session is tactical, concrete, and immediately executable in your next 90 minutes.',
-                    },
-                  ].map((item) => (
-                    <div key={item.k} className="bg-[#0E1014] border border-white/10 p-5">
-                      <span
-                        className="text-xs text-[#D4FF00] uppercase block mb-1.5"
-                        style={{ fontFamily: "'JetBrains Mono', monospace" }}
-                      >
-                        {item.k}
-                      </span>
-                      <p className="text-xs sm:text-sm text-[#8A909E] leading-relaxed">{item.v}</p>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Direct CTA */}
-                <div className="pt-4">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setIntakeSubmitted(false);
-                      setIntakeModalOpen(true);
-                    }}
-                    className="bg-[#D4FF00] text-[#07080A] hover:bg-white transition-colors px-8 py-4 text-xs sm:text-sm font-bold uppercase tracking-wider inline-flex items-center gap-3 cursor-pointer"
-                    style={{ fontFamily: "'JetBrains Mono', monospace" }}
-                  >
-                    <span>WORK PRIVATELY WITH MARK</span>
-                    <ArrowUpRight className="w-4 h-4" />
-                  </button>
+                    WORK WITH MARK
+                  </TactileButton>
+                  <span className="text-xs text-zinc-500">
+                    Opens a private WhatsApp conversation with Mark.
+                  </span>
                 </div>
               </div>
             </div>
           </div>
-        </main>
-      )}
+        </section>
 
-      {/* =====================================================================
-          PAGE 3: PLAYERS & RESULTS
-      ===================================================================== */}
-      {activePage === 'results' && (
-        <main className="py-14 sm:py-24">
-          <div className="max-w-[1440px] mx-auto px-4 sm:px-8">
-            <div className="flex flex-col lg:flex-row lg:items-end justify-between border-b border-white/10 pb-12 mb-12 gap-8">
-              <div>
-                <span
-                  className="text-xs text-[#D4FF00] uppercase block mb-3"
-                  style={{ fontFamily: "'JetBrains Mono', monospace", letterSpacing: '0.16em' }}
+        {/* ===================================================================
+            02 | THE CORE IDEA
+            Strict 12-column architectural grid on deep charcoal (#0c0d0e).
+            Left 5 columns: Thesis & closing principle.
+            Right 7 columns: The two sides of TOPFORM aligned cleanly.
+        =================================================================== */}
+        <section className="bg-[#0c0d0e] text-[#f4f4f5] py-24 sm:py-36 border-b border-white/[0.07]">
+          <div className="max-w-[1320px] mx-auto px-6 sm:px-12 lg:px-16">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-start">
+              {/* Left Architectural Column */}
+              <div className="lg:col-span-5 flex flex-col justify-between">
+                <h2
+                  className="font-bold text-[#f4f4f5] leading-[1.12] tracking-tight"
+                  style={{ fontSize: 'clamp(1.9rem, 3.2vw, 2.75rem)' }}
                 >
-                  // PAGE 03 — VERIFIED TRAJECTORY SHIFTS
-                </span>
-                <h1
-                  className="uppercase leading-[0.9] text-white"
-                  style={{
-                    fontFamily: "'Anton', sans-serif",
-                    fontSize: 'clamp(2.8rem, 7vw, 6.5rem)',
-                  }}
-                >
-                  PLAYERS & RESULTS.
-                </h1>
+                  There are two sides to becoming the best footballer you can be.
+                </h2>
+
+                <div className="hidden lg:block mt-16 pt-8 border-t border-white/[0.08]">
+                  <p className="text-lg text-zinc-400 tracking-tight">
+                    Play at your best.{' '}
+                    <strong className="font-bold text-[#f4f4f5] block mt-1">
+                      Make your best better. Keep doing both.
+                    </strong>
+                  </p>
+                </div>
               </div>
 
-              {/* Competition Filter */}
-              <div className="flex flex-wrap gap-2">
-                {['ALL', 'PREMIER LEAGUE', 'CHAMPIONS LEAGUE', 'LA LIGA'].map((filter) => (
-                  <button
-                    key={filter}
-                    type="button"
-                    onClick={() => setCompetitionFilter(filter)}
-                    className={`px-4 py-2 text-xs uppercase border transition-colors cursor-pointer ${
-                      competitionFilter === filter
-                        ? 'bg-[#D4FF00] text-[#07080A] border-[#D4FF00] font-bold'
-                        : 'bg-[#0E1014] text-[#8A909E] border-white/10 hover:text-white'
-                    }`}
-                    style={{ fontFamily: "'JetBrains Mono', monospace" }}
-                  >
-                    {filter}
-                  </button>
-                ))}
+              {/* Right Architectural Column — Two Aligned Tactile Plates */}
+              <div className="lg:col-span-7 grid grid-cols-1 gap-6">
+                <TactileSurface className="p-8 sm:p-10">
+                  <span className="text-xs font-semibold tracking-[0.16em] text-zinc-500 block mb-3">
+                    01
+                  </span>
+                  <h3 className="text-xl sm:text-2xl font-bold text-[#f4f4f5] tracking-tight leading-[1.2] mb-4">
+                    Bring out the football you already have.
+                  </h3>
+                  <div className="space-y-4 text-[16px] text-zinc-400 leading-[1.75]">
+                    <p>
+                      You&apos;ve spent years developing your game. But having ability and
+                      consistently showing that ability when it matters aren&apos;t always the same
+                      thing.
+                    </p>
+                    <p className="text-[#d4d4d8]">
+                      TOPFORM helps you understand what allows your best football to come out — and
+                      conditions you to get there more consistently.
+                    </p>
+                  </div>
+                </TactileSurface>
+
+                <TactileSurface className="p-8 sm:p-10">
+                  <span className="text-xs font-semibold tracking-[0.16em] text-zinc-500 block mb-3">
+                    02
+                  </span>
+                  <h3 className="text-xl sm:text-2xl font-bold text-[#f4f4f5] tracking-tight leading-[1.2] mb-4">
+                    Keep developing the football you have.
+                  </h3>
+                  <div className="space-y-4 text-[16px] text-zinc-400 leading-[1.75]">
+                    <p>There&apos;s always something you can get better at.</p>
+                    <p className="text-[#f4f4f5] font-medium">
+                      Your movement. Finishing. Positioning. Decision-making. Composure. Confidence.
+                      How you respond to mistakes. Whatever matters most to your game.
+                    </p>
+                    <p className="text-[#d4d4d8]">
+                      Through bespoke Off-Pitch Training, we identify what you want to improve and
+                      deliberately rehearse it.
+                    </p>
+                  </div>
+                </TactileSurface>
+
+                {/* Mobile Closing Line */}
+                <div className="lg:hidden pt-6 border-t border-white/[0.08]">
+                  <p className="text-lg text-zinc-400 tracking-tight">
+                    Play at your best.{' '}
+                    <strong className="font-bold text-[#f4f4f5]">
+                      Make your best better. Keep doing both.
+                    </strong>
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ===================================================================
+            03 | YOUR BEST FOOTBALL
+            Balanced 12-column editorial spread on #111316:
+            Left 5 columns: Framed 4:5 monochrome portrait (never over-stretched).
+            Right 7 columns: Two-part editorial essay.
+        =================================================================== */}
+        <section className="bg-[#111316] text-[#f4f4f5] py-24 sm:py-36 border-b border-white/[0.07]">
+          <div className="max-w-[1320px] mx-auto px-6 sm:px-12 lg:px-16">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-start">
+              {/* Framed Studio Portrait */}
+              <div className="lg:col-span-5">
+                <div className="bg-[#000000] border border-white/[0.08] overflow-hidden">
+                  <img
+                    src="/assets/topform-portrait-cover.jpg"
+                    alt="TOPFORM Studio Portrait"
+                    loading="lazy"
+                    className="w-full aspect-[4/5] object-cover object-center block"
+                  />
+                </div>
+              </div>
+
+              {/* Editorial Essay Column */}
+              <div className="lg:col-span-7">
+                <h2
+                  className="font-bold text-[#f4f4f5] leading-[1.12] tracking-tight mb-8"
+                  style={{ fontSize: 'clamp(1.9rem, 3.2vw, 2.7rem)' }}
+                >
+                  You know what it feels like when you&apos;re at your best.
+                </h2>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-10 pt-6 border-t border-white/[0.08]">
+                  {/* Part 1: Blue Performance State */}
+                  <div className="space-y-4 text-[16px] text-zinc-400 leading-[1.75]">
+                    <p className="text-lg font-semibold text-[#f4f4f5]">You&apos;re in the game.</p>
+                    <p>
+                      Your mind is clear. You&apos;re present. You&apos;re not overthinking
+                      anything.
+                    </p>
+                    <p>
+                      You see things quickly. Decisions come naturally. You trust yourself. Your
+                      game feels instinctive, automatic and effortless.
+                    </p>
+                    <p>Some players call it being in the zone. Others call it flow.</p>
+
+                    <p className="text-xl font-bold text-[#69E0FA] py-1 leading-[1.3] tracking-tight">
+                      I call it your Blue Performance State.
+                    </p>
+
+                    <p>
+                      One of the first things we&apos;ll work on in TOPFORM is understanding what
+                      takes you away from that state — and conditioning you to get there more
+                      consistently.
+                    </p>
+                    <p className="font-semibold text-[#f4f4f5]">
+                      Because having the ability is one thing. Being able to consistently bring it
+                      onto the pitch is another.
+                    </p>
+                  </div>
+
+                  {/* Part 2: Making Your Best Better */}
+                  <div className="space-y-4 text-[16px] text-zinc-400 leading-[1.75]">
+                    <p className="text-lg font-semibold text-[#f4f4f5]">
+                      But playing at your best is only half of it.
+                      <span className="block mt-1">
+                        Because what if we can make your best even better?
+                      </span>
+                    </p>
+                    <p>
+                      No matter how well you&apos;re playing, there&apos;s always something you can
+                      get better at.
+                    </p>
+                    <p className="text-[#d4d4d8] font-medium">
+                      Your movement. Finishing. First touch. Positioning. Scanning. Decision-making.
+                      Composure. Confidence. How you respond to mistakes. Whatever matters most to
+                      your game.
+                    </p>
+                    <p>
+                      Through bespoke Off-Pitch Training, we take what you want to improve and
+                      deliberately rehearse it.
+                    </p>
+                    <p className="pt-2 font-bold text-[#f4f4f5]">
+                      Play at your best. Make your best better. Keep doing both.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ===================================================================
+            04 | PERFORMANCE (Red Brain → Green Brain → Blue Performance State)
+            Clean 12-column introduction + aligned 3-column architectural row.
+        =================================================================== */}
+        <section className="bg-[#0c0d0e] text-[#f4f4f5] py-24 sm:py-36 border-b border-white/[0.07]">
+          <div className="max-w-[1320px] mx-auto px-6 sm:px-12 lg:px-16">
+            {/* Section Header & Lead */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 items-start mb-16 sm:mb-20">
+              <div className="lg:col-span-5">
+                <h2
+                  className="font-bold text-[#f4f4f5] leading-[1.12] tracking-tight"
+                  style={{ fontSize: 'clamp(1.9rem, 3.2vw, 2.75rem)' }}
+                >
+                  What stops your best football coming out?
+                </h2>
+              </div>
+
+              <div className="lg:col-span-7 space-y-4 text-[16.5px] text-zinc-400 leading-[1.75]">
+                <p className="text-lg font-semibold text-[#f4f4f5]">Sometimes it&apos;s pressure.</p>
+                <p>
+                  Sometimes it&apos;s a mistake, a missed chance, a bad decision or something the
+                  referee has done.
+                </p>
+                <p>
+                  Sometimes your mind has gone to what happens if you lose the ball, whether
+                  you&apos;re going to start next week, or you&apos;re trying too hard to make
+                  something happen.
+                </p>
+                <p>
+                  And sometimes you&apos;re simply trying to consciously control parts of your game
+                  that you&apos;ve spent years learning to do automatically.
+                </p>
               </div>
             </div>
 
-            {/* Deep-Dive Case Studies Stack */}
-            <div className="space-y-12">
-              {filteredCases.map((study) => (
-                <article
-                  key={study.id}
-                  className="grid grid-cols-1 lg:grid-cols-12 border border-white/15 bg-[#0E1014] overflow-hidden"
+            {/* Aligned 3-Column Progression */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
+              {/* Act I: Red Brain */}
+              <TactileSurface className="p-8 sm:p-10 h-full flex flex-col">
+                <div className="flex items-center justify-between mb-5 pb-4 border-b border-white/[0.07]">
+                  <h3 className="text-xl font-bold text-[#f4f4f5] tracking-tight">Red Brain</h3>
+                  <span className="text-xs font-semibold tracking-[0.14em] text-zinc-500">01</span>
+                </div>
+                <div className="space-y-4 text-[15.5px] text-zinc-400 leading-[1.75]">
+                  <p className="text-[#d4d4d8] font-medium">
+                    Your Red Brain isn&apos;t something we&apos;re trying to get rid of.
+                  </p>
+                  <p className="text-[#f4f4f5] font-semibold">
+                    But we don&apos;t want it in control.
+                  </p>
+                  <p>
+                    Left in control, anger can become frustration. Nerves can become anxiety.
+                    Thinking can become overthinking. Pressure can make you rush, hesitate, force
+                    things or play safe.
+                  </p>
+                  <p>
+                    But those same raw ingredients can be incredibly useful when they&apos;re
+                    controlled in the right way.
+                  </p>
+                </div>
+              </TactileSurface>
+
+              {/* Act II: Green Brain */}
+              <TactileSurface className="p-8 sm:p-10 h-full flex flex-col">
+                <div className="flex items-center justify-between mb-5 pb-4 border-b border-white/[0.07]">
+                  <h3 className="text-xl font-bold text-[#f4f4f5] tracking-tight">Green Brain</h3>
+                  <span className="text-xs font-semibold tracking-[0.14em] text-zinc-500">02</span>
+                </div>
+                <div className="space-y-4 text-[15.5px] text-zinc-400 leading-[1.75]">
+                  <p className="text-[#f4f4f5] font-medium">
+                    This is where your Green Brain comes in.
+                  </p>
+                  <p>
+                    Your Green Brain keeps you present and puts your attention onto the things you
+                    can control.
+                  </p>
+                  <p>
+                    And rather than allowing Red Brain to take over, Green Brain takes control of
+                    what Red Brain gives you.
+                  </p>
+                  <p className="text-[#d4d4d8] font-medium">
+                    Anger can become aggression and intensity. Nerves and anxiety can become
+                    sharpness, awareness and energy.
+                  </p>
+                  <p>
+                    You&apos;re not trying to become emotionless or completely calm. You&apos;re
+                    using what you&apos;ve got.
+                  </p>
+                </div>
+              </TactileSurface>
+
+              {/* Act III: Blue Performance State */}
+              <TactileSurface
+                sheenTone="blue"
+                className="p-8 sm:p-10 h-full flex flex-col border-[#008BCE]/35"
+              >
+                <div className="flex items-center justify-between mb-5 pb-4 border-b border-[#008BCE]/25">
+                  <h3 className="text-xl font-bold text-[#69E0FA] tracking-tight">
+                    Blue Performance State
+                  </h3>
+                  <span className="text-xs font-semibold tracking-[0.14em] text-[#69E0FA]">03</span>
+                </div>
+                <div className="space-y-4 text-[15.5px] text-zinc-400 leading-[1.75] flex-1 flex flex-col justify-between">
+                  <div className="space-y-4">
+                    <p>
+                      When Green Brain is in control and those raw ingredients from Red Brain are
+                      working for you rather than against you, you create your{' '}
+                      <strong className="text-[#f4f4f5] font-semibold">
+                        Blue Performance State
+                      </strong>
+                      .
+                    </p>
+                    <p className="text-[#f4f4f5] font-semibold">
+                      Your mind is clear. You&apos;re present.
+                    </p>
+                    <p>
+                      You&apos;re seeing, reacting and deciding rather than consciously trying to
+                      control your football.
+                    </p>
+                  </div>
+                  <p className="text-xl font-bold text-[#69E0FA] pt-4 border-t border-white/[0.07] tracking-tight">
+                    Your football takes over.
+                  </p>
+                </div>
+              </TactileSurface>
+            </div>
+          </div>
+        </section>
+
+        {/* ===================================================================
+            EDITORIAL MOMENT | FABIO CARVALHO
+            Pure #000000 background matching the monochrome portrait.
+        =================================================================== */}
+        <section className="relative bg-[#000000] text-[#f4f4f5] border-b border-white/[0.07] overflow-hidden">
+          <div className="max-w-[1320px] mx-auto px-6 sm:px-12 lg:px-16">
+            <div className="grid grid-cols-1 lg:grid-cols-12 items-center gap-8">
+              <div className="lg:col-span-6">
+                <img
+                  src="/assets/topform-fabio-editorial-bw.jpg"
+                  alt="Fabio Carvalho"
+                  loading="lazy"
+                  className="w-full h-auto object-cover block"
+                />
+              </div>
+
+              <div className="lg:col-span-6 py-12 lg:py-20">
+                <blockquote
+                  className="font-medium text-[#f4f4f5] leading-[1.5] tracking-tight"
+                  style={{ fontSize: 'clamp(1.25rem, 2vw, 1.65rem)' }}
                 >
-                  {/* Visual Column */}
-                  <div className="lg:col-span-5 relative min-h-[300px] bg-[#07080A] overflow-hidden">
-                    <img
-                      src={study.image}
-                      alt={study.headline}
-                      className="w-full h-full object-cover grayscale contrast-125 opacity-65"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#0E1014] via-transparent to-black/50" />
-                    <div className="absolute top-5 left-5 flex items-center gap-2">
-                      <span
-                        className="px-3 py-1 bg-[#07080A]/90 border border-white/20 text-[11px] text-[#D4FF00] uppercase"
-                        style={{ fontFamily: "'JetBrains Mono', monospace" }}
+                  &ldquo;Working with Mark on the mental side of my game and understanding how to
+                  get into my Blue Performance State has allowed me to play with a clear mind and
+                  let my best football come out consistently on the pitch.&rdquo;
+                </blockquote>
+                <p className="text-sm text-zinc-400 mt-6 tracking-[0.02em]">Fabio Carvalho</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ===================================================================
+            05 | BESPOKE OFF-PITCH TRAINING
+            Clean 12-column header + aligned 3-column positional triptych.
+        =================================================================== */}
+        <section className="bg-[#0c0d0e] text-[#f4f4f5] py-24 sm:py-36 border-b border-white/[0.07]">
+          <div className="max-w-[1320px] mx-auto px-6 sm:px-12 lg:px-16">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 items-start mb-16 sm:mb-20">
+              <div className="lg:col-span-5">
+                <h2
+                  className="font-bold text-[#f4f4f5] leading-[1.12] tracking-tight"
+                  style={{ fontSize: 'clamp(1.9rem, 3.2vw, 2.75rem)' }}
+                >
+                  Work on your game — even when you&apos;re not on the pitch.
+                </h2>
+              </div>
+
+              <div className="lg:col-span-7 space-y-4 text-[16.5px] text-zinc-400 leading-[1.75]">
+                <p className="text-lg font-semibold text-[#f4f4f5]">
+                  There&apos;s only so much physical training you can do.
+                </p>
+                <p>
+                  Your club controls your training load. You have matches to play, recovery to
+                  manage and a body that needs to be ready to perform.
+                </p>
+                <p>But that doesn&apos;t mean you have to stop working on your game.</p>
+                <p className="font-semibold text-[#d4d4d8]">
+                  Through bespoke Off-Pitch Training, we take the situations that matter to your
+                  football and deliberately rehearse them.
+                </p>
+              </div>
+            </div>
+
+            {/* Positional Triptych */}
+            <div className="pt-12 border-t border-white/[0.07]">
+              <h3 className="text-xl sm:text-2xl font-bold text-[#f4f4f5] tracking-tight mb-10">
+                Your position. Your game. Your situations.
+              </h3>
+
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
+                <TactileSurface className="p-8 sm:p-10 h-full">
+                  <span className="text-xs font-semibold tracking-[0.14em] text-zinc-500 block mb-4">
+                    01
+                  </span>
+                  <p className="text-[16px] text-zinc-400 leading-[1.75]">
+                    <strong className="font-semibold text-[#f4f4f5]">
+                      If you&apos;re a striker,
+                    </strong>{' '}
+                    we might rehearse the movement you&apos;re working on with your striker coach.
+                    Attacking a particular type of cross. Creating separation from a centre-back. A
+                    1v1 with the goalkeeper. Or what you do immediately after missing a chance.
+                  </p>
+                </TactileSurface>
+
+                <TactileSurface className="p-8 sm:p-10 h-full">
+                  <span className="text-xs font-semibold tracking-[0.14em] text-zinc-500 block mb-4">
+                    02
+                  </span>
+                  <p className="text-[16px] text-zinc-400 leading-[1.75]">
+                    <strong className="font-semibold text-[#f4f4f5]">
+                      If you&apos;re a midfielder,
+                    </strong>{' '}
+                    it might be scanning before you receive, recognising where the pressure is
+                    coming from, receiving on the half-turn or seeing the next pass earlier.
+                  </p>
+                </TactileSurface>
+
+                <TactileSurface className="p-8 sm:p-10 h-full">
+                  <span className="text-xs font-semibold tracking-[0.14em] text-zinc-500 block mb-4">
+                    03
+                  </span>
+                  <p className="text-[16px] text-zinc-400 leading-[1.75]">
+                    <strong className="font-semibold text-[#f4f4f5]">
+                      If you&apos;re a defender,
+                    </strong>{' '}
+                    it might be decision-making, breaking lines, stepping in with the ball, playing
+                    more effective diagonal passes, 1v1 defending, leadership or composure.
+                  </p>
+                </TactileSurface>
+              </div>
+
+              <p className="mt-12 text-lg text-zinc-400 leading-[1.7]">
+                And next week it could be something completely different.{' '}
+                <strong className="font-semibold text-[#f4f4f5]">
+                  Because the work changes as your football changes.
+                </strong>
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* ===================================================================
+            06 | PLAYER PROOF — BIM PEPPLE
+            Full-width monochrome stadium tunnel photograph with:
+            “IT'S JUST LIKE PRACTISING.” and Bim's name.
+        =================================================================== */}
+        <section
+          onClick={() => setBimVideoOpen(true)}
+          className="relative w-full min-h-[78vh] bg-[#000000] text-[#f4f4f5] flex items-center overflow-hidden cursor-pointer group border-b border-white/[0.07]"
+          title="Click to watch Bim Pepple's press conference"
+        >
+          <img
+            src="/assets/topform-monochrome-tunnel.jpg"
+            alt="Bim Pepple — It's just like practising"
+            loading="lazy"
+            className="absolute inset-0 w-full h-full object-cover object-center transition-transform duration-1000 group-hover:scale-[1.015]"
+          />
+
+          <div className="relative z-10 max-w-[1320px] w-full mx-auto px-6 sm:px-12 lg:px-16 py-24">
+            <div className="max-w-[540px]">
+              <h2
+                className="font-bold text-[#ffffff] leading-[1.05] tracking-tight"
+                style={{ fontSize: 'clamp(2.2rem, 4.4vw, 3.75rem)' }}
+              >
+                &ldquo;IT&apos;S JUST LIKE PRACTISING.&rdquo;
+              </h2>
+
+              <p className="mt-6 text-base sm:text-lg text-zinc-300 font-normal leading-[1.6] max-w-[420px]">
+                &ldquo;When you are in that position on the pitch, it feels like you&apos;ve been
+                there before.&rdquo;
+              </p>
+
+              <p className="mt-5 text-sm text-[#ffffff]/85 font-medium tracking-[0.02em]">
+                Bim Pepple
+              </p>
+
+              <span className="inline-block mt-8 text-[11px] uppercase tracking-[0.14em] text-zinc-400 group-hover:text-[#ffffff] border-b border-white/25 group-hover:border-[#008BCE] pb-1 transition-colors">
+                Watch press conference
+              </span>
+            </div>
+          </div>
+        </section>
+
+        {/* ===================================================================
+            07 | THE ONGOING WORK & 08 | WORKING WITH YOUR COACHING
+            Balanced 12-column two-part architectural spread.
+        =================================================================== */}
+        <section className="bg-[#0c0d0e] text-[#f4f4f5] py-24 sm:py-36 border-b border-white/[0.07]">
+          <div className="max-w-[1320px] mx-auto px-6 sm:px-12 lg:px-16">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-start">
+              {/* 07 | Your football decides what we work on */}
+              <div className="lg:col-span-6">
+                <h2
+                  className="font-bold text-[#f4f4f5] leading-[1.12] tracking-tight mb-8"
+                  style={{ fontSize: 'clamp(1.85rem, 3vw, 2.55rem)' }}
+                >
+                  Your football decides what we work on.
+                </h2>
+
+                <div className="space-y-4 text-[16px] text-zinc-400 leading-[1.75]">
+                  <p>
+                    Every time we work together, we look at what&apos;s actually happening in your
+                    football.
+                  </p>
+
+                  <ul className="space-y-2.5 py-3">
+                    {[
+                      "What's going well?",
+                      'What could be better?',
+                      'What are you working on with your coaches?',
+                      'What keeps appearing in training or matches?',
+                      'What do you want to improve?',
+                    ].map((q) => (
+                      <li
+                        key={q}
+                        className="flex items-center gap-3.5 text-[#f4f4f5] font-semibold"
                       >
-                        {study.code}
-                      </span>
-                      <span
-                        className="px-3 py-1 bg-[#07080A]/90 border border-white/10 text-[11px] text-white uppercase"
-                        style={{ fontFamily: "'JetBrains Mono', monospace" }}
-                      >
-                        {study.competition}
-                      </span>
-                    </div>
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#008BCE] shrink-0" />
+                        <span>{q}</span>
+                      </li>
+                    ))}
+                  </ul>
+
+                  <p className="font-semibold text-[#f4f4f5]">
+                    Then we decide what will make the biggest difference to your game — and we work
+                    on it.
+                  </p>
+                  <p>
+                    It might be something that happened in your last match. Something you&apos;re
+                    working on in training. Something your coach wants from you. A situation that
+                    keeps appearing. Or simply something you want to add to your game.
+                  </p>
+                  <p>
+                    We can then turn that into bespoke Off-Pitch Training — deliberately rehearsing
+                    the situations that matter to you.
+                  </p>
+                  <p>And as your football changes, the work changes with it.</p>
+                  <p className="font-medium text-[#d4d4d8]">
+                    The better I understand you, your game, your position and the situations you
+                    face, the more specific the work becomes.
+                  </p>
+                </div>
+              </div>
+
+              {/* 08 | Your coaches are working on your game. So are we. */}
+              <div className="lg:col-span-6">
+                <TactileSurface className="p-8 sm:p-12">
+                  <h2
+                    className="font-bold text-[#f4f4f5] leading-[1.12] tracking-tight mb-8"
+                    style={{ fontSize: 'clamp(1.75rem, 2.8vw, 2.35rem)' }}
+                  >
+                    Your coaches are working on your game.
+                    <span className="block mt-1 text-[#d4d4d8]">So are we.</span>
+                  </h2>
+
+                  <div className="space-y-4 text-[16px] text-zinc-400 leading-[1.75]">
+                    <p>
+                      If your striker coach is working with you on making a particular movement, we
+                      can rehearse it.
+                    </p>
+                    <p>
+                      If your manager wants something different from you tactically, we can work on
+                      recognising those situations.
+                    </p>
+                    <p>
+                      If you&apos;ve been doing something on the training pitch that isn&apos;t
+                      quite appearing naturally in matches yet, we can work on that too.
+                    </p>
+                    <p className="pt-4 border-t border-white/[0.07] text-lg font-semibold text-[#f4f4f5]">
+                      You work on it with your coaches on the pitch. We can deliberately rehearse it
+                      off the pitch.
+                    </p>
+                  </div>
+                </TactileSurface>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ===================================================================
+            09 | PLAYER PROOF — EMILIANO MARCONDES
+            12-column editorial spread with a properly proportioned 4:5 portrait.
+        =================================================================== */}
+        <section className="bg-[#111316] text-[#f4f4f5] py-24 sm:py-32 border-b border-white/[0.07]">
+          <div className="max-w-[1320px] mx-auto px-6 sm:px-12 lg:px-16">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
+              <div className="lg:col-span-7">
+                <h2
+                  className="font-bold text-[#f4f4f5] leading-[1.08] tracking-tight mb-8"
+                  style={{ fontSize: 'clamp(1.85rem, 3.2vw, 2.65rem)' }}
+                >
+                  &ldquo;IT HAS DEFINITELY IMPROVED ME AS A PLAYER.&rdquo;
+                </h2>
+
+                <blockquote className="text-lg sm:text-xl text-zinc-300 font-normal leading-[1.65] mb-6 max-w-[580px]">
+                  &ldquo;Mark and I have been working together for a few years, working on the
+                  psychological part of my game and building good habits and focus points for each
+                  game. It has definitely improved me as a player.&rdquo;
+                </blockquote>
+
+                <p className="text-sm text-zinc-400 tracking-[0.02em]">Emiliano Marcondes</p>
+              </div>
+
+              <div className="lg:col-span-5">
+                <div className="bg-[#000000] border border-white/[0.08] overflow-hidden">
+                  <img
+                    src="/assets/topform-portrait-intense.jpg"
+                    alt="TOPFORM Monochrome Portrait"
+                    loading="lazy"
+                    className="w-full aspect-[4/5] object-cover object-center block"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ===================================================================
+            10 | CAREER JOURNEYS ("THE STORY IS THE DESIGN")
+            Architectural editorial chapters separated by crisp 1px hairlines.
+            Left 5 cols: Two-line career transformation headline.
+            Right 7 cols: Starting point & career trajectory side-by-side.
+        =================================================================== */}
+        <section className="bg-[#0c0d0e] text-[#f4f4f5] py-24 sm:py-36 border-b border-white/[0.07]">
+          <div className="max-w-[1320px] mx-auto px-6 sm:px-12 lg:px-16">
+            {/* Section Introduction */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 items-start mb-20">
+              <div className="lg:col-span-5">
+                <h2
+                  className="font-bold text-[#f4f4f5] leading-[1.12] tracking-tight"
+                  style={{ fontSize: 'clamp(1.95rem, 3.4vw, 2.85rem)' }}
+                >
+                  Where they started.
+                  <span className="block mt-1 text-[#d4d4d8]">Where their football took them.</span>
+                </h2>
+              </div>
+
+              <div className="lg:col-span-7 space-y-3 text-[16.5px] text-zinc-400 leading-[1.75]">
+                <p className="font-semibold text-[#f4f4f5]">
+                  Every player&apos;s journey is different.
+                </p>
+                <p>
+                  The following players came to me at very different points in their careers, with
+                  very different challenges.
+                </p>
+                <p>
+                  This is where they were when we started working together — and where their careers
+                  went next.
+                </p>
+              </div>
+            </div>
+
+            {/* Four Architectural Story Chapters */}
+            <div className="divide-y divide-white/[0.08] border-t border-b border-white/[0.08]">
+              {CAREER_STORIES.map((story) => (
+                <article
+                  key={story.id}
+                  className="py-12 sm:py-16 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start"
+                >
+                  {/* Left: Story Headline */}
+                  <div className="lg:col-span-5">
+                    <span className="text-xs font-semibold tracking-[0.16em] text-zinc-500 block mb-3">
+                      {story.index}
+                    </span>
+                    <h3
+                      className="font-bold text-[#f4f4f5] leading-[1.1] tracking-tight"
+                      style={{ fontSize: 'clamp(1.45rem, 2.3vw, 2rem)' }}
+                    >
+                      <span className="block">{story.headlineLine1}</span>
+                      <span className="block mt-1.5 text-[#d4d4d8]">{story.headlineLine2}</span>
+                    </h3>
                   </div>
 
-                  {/* Dossier Content Column */}
-                  <div className="lg:col-span-7 p-8 sm:p-12 flex flex-col justify-between">
-                    <div>
-                      <span
-                        className="text-xs text-[#8A909E] uppercase block mb-2"
-                        style={{ fontFamily: "'JetBrains Mono', monospace" }}
-                      >
-                        ROLE: {study.position}
-                      </span>
-                      <h2
-                        className="text-3xl sm:text-5xl uppercase text-white leading-[0.94] mb-4"
-                        style={{ fontFamily: "'Anton', sans-serif" }}
-                      >
-                        {study.headline}
-                      </h2>
-                      <p className="text-sm sm:text-base text-[#C4C9D4] leading-relaxed mb-8">
-                        {study.subheadline}
-                      </p>
-
-                      {/* Before / After Telemetry Strip */}
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 p-4 bg-[#07080A] border border-white/10 mb-8">
-                        <div>
-                          <span
-                            className="text-[10px] text-[#8A909E] uppercase block"
-                            style={{ fontFamily: "'JetBrains Mono', monospace" }}
-                          >
-                            BASELINE (PRE-INTAKE)
-                          </span>
-                          <span
-                            className="text-xl text-white/70 uppercase block mt-1"
-                            style={{ fontFamily: "'Anton', sans-serif" }}
-                          >
-                            {study.beforeMetric}
-                          </span>
-                        </div>
-                        <div>
-                          <span
-                            className="text-[10px] text-[#8A909E] uppercase block"
-                            style={{ fontFamily: "'JetBrains Mono', monospace" }}
-                          >
-                            POST-PROTOCOL OUTPUT
-                          </span>
-                          <span
-                            className="text-xl text-[#D4FF00] uppercase block mt-1"
-                            style={{ fontFamily: "'Anton', sans-serif" }}
-                          >
-                            {study.afterMetric}
-                          </span>
-                        </div>
-                        <div>
-                          <span
-                            className="text-[10px] text-[#8A909E] uppercase block"
-                            style={{ fontFamily: "'JetBrains Mono', monospace" }}
-                          >
-                            VERIFIED DELTA
-                          </span>
-                          <span
-                            className="text-xl text-white uppercase block mt-1"
-                            style={{ fontFamily: "'Anton', sans-serif" }}
-                          >
-                            {study.deltaLabel}
-                          </span>
-                        </div>
-                      </div>
-
-                      <blockquote className="border-l-2 border-[#D4FF00] pl-4 text-sm sm:text-base italic text-white/90 mb-6">
-                        {study.quote}
-                      </blockquote>
-                    </div>
-
-                    <div className="flex flex-wrap items-center justify-between gap-4 pt-6 border-t border-white/10">
-                      <div className="flex flex-wrap gap-2">
-                        {study.pillarsUsed.map((tag) => (
-                          <span
-                            key={tag}
-                            className="text-[10px] uppercase px-2.5 py-1 bg-white/[0.04] border border-white/10 text-[#C4C9D4]"
-                            style={{ fontFamily: "'JetBrains Mono', monospace" }}
-                          >
-                            {tag}
-                          </span>
+                  {/* Right: Starting Point & Career Trajectory */}
+                  <div className="lg:col-span-7">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 text-[15.5px] text-zinc-400 leading-[1.75]">
+                      <div className="space-y-2.5">
+                        <p className="text-[11px] font-semibold tracking-[0.12em] uppercase text-zinc-500">
+                          When we started working together
+                        </p>
+                        {story.whenWeStarted.map((line) => (
+                          <p key={line}>{line}</p>
                         ))}
                       </div>
 
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setIntakeSubmitted(false);
-                          setIntakeModalOpen(true);
-                        }}
-                        className="text-xs text-[#D4FF00] uppercase font-bold flex items-center gap-1.5 hover:underline cursor-pointer"
-                        style={{ fontFamily: "'JetBrains Mono', monospace" }}
-                      >
-                        <span>REQUEST SIMILAR PROTOCOL</span>
-                        <ArrowUpRight className="w-4 h-4" />
-                      </button>
+                      <div className="space-y-2.5">
+                        <p className="text-[11px] font-semibold tracking-[0.12em] uppercase text-zinc-500">
+                          Where his career went
+                        </p>
+                        {story.whereItWentIntro && <p>{story.whereItWentIntro}</p>}
+                        {story.whereItWentBullets && (
+                          <ul className="space-y-2 py-1">
+                            {story.whereItWentBullets.map((b) => (
+                              <li
+                                key={b}
+                                className="flex items-center gap-3 font-semibold text-[#f4f4f5]"
+                              >
+                                <span className="w-1.5 h-1.5 rounded-full bg-[#008BCE] shrink-0" />
+                                <span>{b}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                        {story.whereItWentBody && <p>{story.whereItWentBody}</p>}
+                      </div>
                     </div>
+
+                    <p className="mt-6 pt-5 border-t border-white/[0.06] text-[15.5px] font-semibold text-[#f4f4f5]">
+                      {story.summaryLine}
+                    </p>
                   </div>
                 </article>
               ))}
             </div>
           </div>
-        </main>
-      )}
+        </section>
 
-      {/* Footer */}
-      <footer className="border-t border-white/10 bg-[#050608] py-12">
-        <div className="max-w-[1440px] mx-auto px-4 sm:px-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
-          <div>
-            <span
-              className="text-xl text-white tracking-wider"
-              style={{ fontFamily: "'Anton', sans-serif" }}
-            >
-              TOPFORM<span className="text-[#D4FF00]">®</span>
-            </span>
-            <p
-              className="text-[11px] text-[#8A909E] mt-1 uppercase"
-              style={{ fontFamily: "'JetBrains Mono', monospace" }}
-            >
-              PRIVATE PERFORMANCE ARCHITECTURE FOR PROFESSIONAL FOOTBALLERS · LONDON / MADRID /
-              MUNICH
-            </p>
+        {/* ===================================================================
+            11 | WHY TOPFORM & 12 | WHO IT'S FOR
+            12-column editorial layout pairing Mark Bowden's portrait & essay
+            with "You don't need to be struggling to get better."
+        =================================================================== */}
+        <section className="bg-[#111316] text-[#f4f4f5] py-24 sm:py-36 border-b border-white/[0.07]">
+          <div className="max-w-[1320px] mx-auto px-6 sm:px-12 lg:px-16">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-start">
+              {/* 11 | Why I built TOPFORM */}
+              <div className="lg:col-span-6">
+                <h2
+                  className="font-bold text-[#f4f4f5] leading-[1.12] tracking-tight mb-8"
+                  style={{ fontSize: 'clamp(1.85rem, 3vw, 2.55rem)' }}
+                >
+                  Why I built TOPFORM.
+                </h2>
+
+                <div className="space-y-4 text-[16px] text-zinc-400 leading-[1.75]">
+                  <p>
+                    I&apos;ve spent years working with professional footballers and trying to
+                    understand one thing:
+                  </p>
+                  <p className="text-lg font-semibold text-[#f4f4f5] py-1 tracking-tight">
+                    What allows a player&apos;s best football to come out consistently?
+                  </p>
+                  <p>
+                    That question led to the ideas I first explored in{' '}
+                    <em className="font-medium text-[#d4d4d8]">Use Your Brain, Raise Your Game</em>{' '}
+                    — Red Brain, Green Brain and eventually the Blue Performance State.
+                  </p>
+                  <p>
+                    But the longer I&apos;ve worked with players, the more the work has evolved.
+                  </p>
+                  <p>
+                    It isn&apos;t only about helping a player bring out the football they already
+                    have.
+                  </p>
+                  <p className="font-semibold text-[#f4f4f5]">
+                    It&apos;s also about helping them develop the football they have.
+                  </p>
+                  <p>That&apos;s what TOPFORM has become.</p>
+                  <p className="font-medium text-[#d4d4d8]">
+                    Helping you play consistently at your best — while continually working to make
+                    your best even better.
+                  </p>
+                </div>
+
+                <div className="mt-8 flex items-center gap-4 pt-6 border-t border-white/[0.08]">
+                  <img
+                    src="/assets/topform-mark-bowden.jpg"
+                    alt="Mark Bowden"
+                    loading="lazy"
+                    className="w-14 h-14 object-cover grayscale border border-white/10"
+                  />
+                  <div>
+                    <div className="text-sm font-bold text-[#f4f4f5]">Mark Bowden</div>
+                    <div className="text-xs text-zinc-400">Founder, TOPFORM</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* 12 | You don't need to be struggling to get better */}
+              <div className="lg:col-span-6">
+                <TactileSurface className="p-8 sm:p-12">
+                  <h2
+                    className="font-bold text-[#f4f4f5] leading-[1.12] tracking-tight mb-6"
+                    style={{ fontSize: 'clamp(1.75rem, 2.8vw, 2.35rem)' }}
+                  >
+                    You don&apos;t need to be struggling to get better.
+                  </h2>
+
+                  <div className="space-y-4 text-[16px] text-zinc-400 leading-[1.75]">
+                    <p>
+                      TOPFORM is for professional footballers who are serious about getting
+                      everything they can from their ability — and continuing to improve it.
+                    </p>
+
+                    <ul className="space-y-2.5 py-2">
+                      {[
+                        "You don't need to be struggling.",
+                        "You don't need to have lost confidence.",
+                        "You don't need to be out of form.",
+                      ].map((item) => (
+                        <li
+                          key={item}
+                          className="flex items-center gap-3.5 text-[#f4f4f5] font-semibold"
+                        >
+                          <span className="w-1.5 h-1.5 rounded-full bg-[#008BCE] shrink-0" />
+                          <span>{item}</span>
+                        </li>
+                      ))}
+                    </ul>
+
+                    <p>
+                      You can be playing some of the best football of your career and still want
+                      more.
+                    </p>
+                    <p className="text-lg font-semibold text-[#f4f4f5] py-1 tracking-tight">
+                      How do I keep this coming out?
+                      <span className="block mt-1">And how do I get even better?</span>
+                    </p>
+                    <p className="font-semibold text-[#d4d4d8]">
+                      That&apos;s what TOPFORM is built around.
+                    </p>
+                  </div>
+                </TactileSurface>
+              </div>
+            </div>
           </div>
-          <div
-            className="text-[11px] text-[#8A909E] uppercase"
-            style={{ fontFamily: "'JetBrains Mono', monospace" }}
-          >
-            © {new Date().getFullYear()} TOPFORM PERFORMANCE LTD. ALL CLIENT RECORDS PROTECTED BY
-            NDA.
+        </section>
+
+        {/* ===================================================================
+            13 | WORKING TOGETHER & 14 | FINAL CLOSE
+            Balanced 12-column closing spread.
+        =================================================================== */}
+        <section className="bg-[#0c0d0e] text-[#f4f4f5] py-24 sm:py-36">
+          <div className="max-w-[1320px] mx-auto px-6 sm:px-12 lg:px-16">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-stretch">
+              {/* 13 | Private. Bespoke. Built around your football. */}
+              <div className="lg:col-span-6">
+                <TactileSurface className="p-8 sm:p-12 h-full flex flex-col justify-between">
+                  <div>
+                    <h2
+                      className="font-bold text-[#f4f4f5] leading-[1.12] tracking-tight mb-6"
+                      style={{ fontSize: 'clamp(1.8rem, 2.8vw, 2.4rem)' }}
+                    >
+                      Private. Bespoke.
+                      <span className="block mt-1 text-[#d4d4d8]">Built around your football.</span>
+                    </h2>
+
+                    <div className="space-y-4 text-[16px] text-zinc-400 leading-[1.75]">
+                      <p className="font-semibold text-[#f4f4f5]">
+                        I work personally with a limited number of professional footballers at any
+                        one time.
+                      </p>
+                      <p>
+                        Our work is ongoing and built around you, your football and what you want to
+                        achieve.
+                      </p>
+                      <p>
+                        We&apos;ll work together privately through regular 1-to-1 sessions, with
+                        prescribed training and bespoke Off-Pitch Training to continue the work
+                        between our sessions.
+                      </p>
+                      <p className="font-medium text-[#d4d4d8]">
+                        The better I understand your game, the more specific our work can become.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="pt-8 mt-8 border-t border-white/[0.07]">
+                    <TactileButton
+                      href={getWhatsAppUrl()}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      variant="alabaster"
+                    >
+                      WORK WITH MARK
+                    </TactileButton>
+                    <p className="text-xs text-zinc-500 mt-3">
+                      Opens a private WhatsApp conversation with Mark.
+                    </p>
+                  </div>
+                </TactileSurface>
+              </div>
+
+              {/* 14 | Final Close */}
+              <div className="lg:col-span-6">
+                <TactileSurface className="p-8 sm:p-12 h-full flex flex-col justify-between">
+                  <div>
+                    <img
+                      src="/assets/topform-logo-white-clean.png"
+                      alt="TOPFORM — Play at your best. Make your best better."
+                      loading="lazy"
+                      className="w-36 h-auto mb-8 opacity-95"
+                    />
+
+                    <h2
+                      className="font-bold text-[#f4f4f5] leading-[1.12] tracking-tight mb-6"
+                      style={{ fontSize: 'clamp(1.8rem, 2.8vw, 2.4rem)' }}
+                    >
+                      How good can you become?
+                    </h2>
+
+                    <div className="space-y-3 text-[16.5px] text-zinc-400 leading-[1.75]">
+                      <p>You&apos;ve spent years building your game.</p>
+                      <p className="font-semibold text-[#f4f4f5]">
+                        There&apos;s the player you are today.
+                      </p>
+                      <p className="font-semibold text-[#f4f4f5]">
+                        And there&apos;s the player you can still become.
+                      </p>
+                      <p>TOPFORM is built to help you get the best from both.</p>
+                    </div>
+
+                    <p className="text-base sm:text-lg text-zinc-300 mt-6 tracking-tight">
+                      Play consistently at your best.{' '}
+                      <strong className="font-bold text-[#f4f4f5]">
+                        Make your best even better.
+                      </strong>
+                    </p>
+                  </div>
+
+                  <div className="pt-8 mt-8 border-t border-white/[0.07]">
+                    <TactileButton
+                      href={getWhatsAppUrl()}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      variant="alabaster"
+                    >
+                      WORK WITH MARK
+                    </TactileButton>
+                    <p className="text-xs text-zinc-500 mt-3">
+                      Opens a private WhatsApp conversation with Mark.
+                    </p>
+                  </div>
+                </TactileSurface>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      {/* =====================================================================
+          COLOPHON / FOOTER
+      ===================================================================== */}
+      <footer className="relative z-10 bg-[#000000] text-[#f4f4f5] border-t-[2px] border-[#008BCE] py-12">
+        <div className="max-w-[1320px] mx-auto px-6 sm:px-12 lg:px-16 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-8">
+          <div className="flex items-center gap-4">
+            <img
+              src="/assets/topform-roundel-white.png"
+              alt="TOPFORM"
+              loading="lazy"
+              className="w-9 h-9 object-contain"
+            />
+            <div>
+              <span className="text-base font-bold tracking-[0.06em] text-[#f4f4f5] block leading-none">
+                TOPFORM
+              </span>
+              <span className="text-[9px] text-zinc-400 tracking-[0.04em] block mt-1">
+                PLAY AT YOUR BEST.{' '}
+                <strong className="font-bold text-[#f4f4f5]">MAKE YOUR BEST BETTER.</strong>
+              </span>
+            </div>
+          </div>
+
+          <div className="text-xs text-zinc-400 sm:text-right space-y-1">
+            <div className="text-[#f4f4f5] font-medium">Mark Bowden</div>
+            <div>07575 203332 &nbsp;·&nbsp; mark@topform.global &nbsp;·&nbsp; www.topform.global</div>
           </div>
         </div>
       </footer>
 
-      {/* Mobile-First Persistent WhatsApp / Private Consultation Floating Bar */}
-      <div className="fixed bottom-0 inset-x-0 z-40 sm:hidden bg-[#07080A]/95 backdrop-blur-lg border-t border-white/15 p-3 flex items-center justify-between gap-3">
-        <div className="pl-1">
-          <span
-            className="text-[10px] text-[#D4FF00] uppercase block"
-            style={{ fontFamily: "'JetBrains Mono', monospace" }}
-          >
-            ● DIRECT PLAYER & AGENT LINE
-          </span>
-          <span className="text-xs text-white font-semibold block">
-            Zero-Friction WhatsApp Intake
-          </span>
-        </div>
-        <button
-          type="button"
-          onClick={() => {
-            setIntakeSubmitted(false);
-            setIntakeModalOpen(true);
-          }}
-          className="bg-[#D4FF00] text-[#07080A] px-4 py-2.5 text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 shrink-0"
-          style={{ fontFamily: "'JetBrains Mono', monospace" }}
+      {/* =====================================================================
+          BIM PEPPLE PRESS CONFERENCE VIDEO OVERLAY
+      ===================================================================== */}
+      {bimVideoOpen && (
+        <div
+          className="fixed inset-0 z-50 bg-[#000000]/95 backdrop-blur-md flex items-center justify-center p-6"
+          onClick={() => setBimVideoOpen(false)}
         >
-          <MessageSquare className="w-3.5 h-3.5" />
-          <span>CONNECT</span>
-        </button>
-      </div>
-
-      {/* Private Client Consultation Modal (Zero-Friction WhatsApp / iMessage Handoff) */}
-      {intakeModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="bg-[#0E1014] border border-white/20 max-w-lg w-full p-6 sm:p-8 relative">
-            <button
-              type="button"
-              onClick={() => setIntakeModalOpen(false)}
-              className="absolute top-5 right-5 text-[#8A909E] hover:text-white cursor-pointer"
-              aria-label="Close modal"
-            >
-              <X className="w-5 h-5" />
-            </button>
-
-            <span
-              className="text-[11px] text-[#D4FF00] uppercase block mb-2"
-              style={{ fontFamily: "'JetBrains Mono', monospace", letterSpacing: '0.14em' }}
-            >
-              // ENCRYPTED PRIVATE INTAKE
-            </span>
-            <h3
-              className="text-3xl uppercase text-white mb-2"
-              style={{ fontFamily: "'Anton', sans-serif" }}
-            >
-              REQUEST PRIVATE CONSULTATION
-            </h3>
-            <p className="text-xs text-[#8A909E] mb-6 leading-relaxed">
-              Designed for direct WhatsApp / iMessage speed. No club emails required. All
-              inquiries go directly to Mark’s private line under strict non-disclosure.
-            </p>
-
-            {/* Role Toggle */}
-            <div className="grid grid-cols-2 gap-2 mb-6">
+          <div className="w-full max-w-[340px]" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between pb-3 text-xs text-zinc-400">
+              <span>Bim Pepple</span>
               <button
                 type="button"
-                onClick={() => setIntakeRole('player')}
-                className={`py-2.5 text-xs uppercase border cursor-pointer ${
-                  intakeRole === 'player'
-                    ? 'bg-[#D4FF00] text-[#07080A] border-[#D4FF00] font-bold'
-                    : 'bg-[#07080A] text-[#8A909E] border-white/10'
-                }`}
-                style={{ fontFamily: "'JetBrains Mono', monospace" }}
+                onClick={() => setBimVideoOpen(false)}
+                className="text-[#f4f4f5] hover:underline cursor-pointer"
               >
-                I AM A PLAYER
-              </button>
-              <button
-                type="button"
-                onClick={() => setIntakeRole('agent')}
-                className={`py-2.5 text-xs uppercase border cursor-pointer ${
-                  intakeRole === 'agent'
-                    ? 'bg-[#D4FF00] text-[#07080A] border-[#D4FF00] font-bold'
-                    : 'bg-[#07080A] text-[#8A909E] border-white/10'
-                }`}
-                style={{ fontFamily: "'JetBrains Mono', monospace" }}
-              >
-                I AM AN AGENT / DIRECTOR
+                Close
               </button>
             </div>
-
-            {!intakeSubmitted ? (
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  setIntakeSubmitted(true);
-                }}
-                className="space-y-4"
-              >
-                <div>
-                  <label
-                    className="block text-[10px] text-[#8A909E] uppercase mb-1"
-                    style={{ fontFamily: "'JetBrains Mono', monospace" }}
-                  >
-                    {intakeRole === 'player' ? 'FIRST NAME OR INITIALS (NDA SAFE)' : 'YOUR NAME & AGENCY / CLUB'}
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    placeholder={
-                      intakeRole === 'player'
-                        ? 'e.g. M.S. — Premier League'
-                        : 'e.g. Darren — FIFA Licensed Agent'
-                    }
-                    className="w-full bg-[#07080A] border border-white/15 px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-[#D4FF00]"
-                  />
-                </div>
-
-                <div>
-                  <label
-                    className="block text-[10px] text-[#8A909E] uppercase mb-1"
-                    style={{ fontFamily: "'JetBrains Mono', monospace" }}
-                  >
-                    DIRECT WHATSAPP / IMESSAGE NUMBER
-                  </label>
-                  <input
-                    type="tel"
-                    required
-                    placeholder="+44 7700 900000"
-                    className="w-full bg-[#07080A] border border-white/15 px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-[#D4FF00]"
-                  />
-                </div>
-
-                <div>
-                  <label
-                    className="block text-[10px] text-[#8A909E] uppercase mb-1"
-                    style={{ fontFamily: "'JetBrains Mono', monospace" }}
-                  >
-                    CURRENT SITUATION / UPCOMING FIXTURE PRIORITY
-                  </label>
-                  <textarea
-                    rows={3}
-                    placeholder="Briefly share current squad status, league, or target outcome..."
-                    className="w-full bg-[#07080A] border border-white/15 px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-[#D4FF00]"
-                  />
-                </div>
-
-                <button
-                  type="submit"
-                  className="w-full py-3.5 bg-[#D4FF00] text-[#07080A] hover:bg-white font-bold text-xs uppercase tracking-wider transition-colors cursor-pointer"
-                  style={{ fontFamily: "'JetBrains Mono', monospace" }}
-                >
-                  DISPATCH DIRECT WHATSAPP BRIEF →
-                </button>
-              </form>
-            ) : (
-              <div className="p-6 bg-[#07080A] border border-[#D4FF00]/40 text-center space-y-3">
-                <CheckCircle2 className="w-8 h-8 text-[#D4FF00] mx-auto" />
-                <h4
-                  className="text-xl uppercase text-white"
-                  style={{ fontFamily: "'Anton', sans-serif" }}
-                >
-                  PRIVATE TRANSMISSION LOGGED
-                </h4>
-                <p className="text-xs text-[#C4C9D4] leading-relaxed">
-                  Mark’s private desk has received your encrypted brief. Expect a personal WhatsApp
-                  message within 4 hours.
-                </p>
-              </div>
-            )}
+            <div className="relative w-full aspect-[9/16] bg-[#000000] border border-white/10">
+              <iframe
+                src={BIM_PEPPLE_VIMEO_EMBED}
+                className="absolute inset-0 w-full h-full"
+                frameBorder="0"
+                allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share"
+                referrerPolicy="strict-origin-when-cross-origin"
+                title="Bim Pepple Press Conference"
+              />
+            </div>
           </div>
         </div>
       )}

@@ -1,7 +1,21 @@
 @import "tailwindcss";
 
+:root {
+  --primary-blue-deep: #0b4ea8;
+  --primary-blue-mid: #1676d1;
+  --primary-blue-light: #5fb9ff;
+  --pure-black: #000000;
+  --pure-white: #ffffff;
+}
+
 * {
   box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  background-color: #000000;
+  color: #ffffff;
 }
 
 html,
@@ -10,6 +24,60 @@ body,
   margin: 0;
   padding: 0;
   width: 100%;
-  height: 100%;
-  font-family: 'Inter', sans-serif;
+  min-height: 100%;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  background-color: #000000;
+  color: #ffffff;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+/* Modern Web Guidance: Balanced headings & orphan-free body copy */
+h1,
+h2,
+h3,
+h4 {
+  text-wrap: balance;
+}
+
+p,
+blockquote,
+li {
+  text-wrap: pretty;
+}
+
+/* EvvyDigital Liquid Glassmorphism Utility */
+.liquid-glass {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.1));
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.1);
+}
+
+.liquid-glass-dark {
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.72), rgba(11, 78, 168, 0.28));
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  box-shadow: 0 20px 50px -12px rgba(0, 0, 0, 0.45);
+}
+
+/* Native <dialog> backdrop styling per modern-web-guidance */
+dialog::backdrop {
+  background-color: rgba(0, 0, 0, 0.72);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

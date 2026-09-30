@@ -14,7 +14,7 @@ const PORTFOLIO_ITEMS = [
     securityOutcome: 'Biometric Zero-Trust & +64% Qualified Demo Lift',
     description:
       'Redesigned the institutional onboarding and cryptographic key-signing experience for a Tier-1 digital asset custodian.',
-    image: '/portfolio1.png',
+    image: `${import.meta.env.BASE_URL}portfolio1.png`,
     alt: 'Fintech Mobile App UI/UX Design with Zero-Trust biometric verification',
     colSpan: 'md:col-span-1',
   },
@@ -25,7 +25,7 @@ const PORTFOLIO_ITEMS = [
     securityOutcome: '89% Faster Incident Triage & MITRE ATT&CK Graph',
     description:
       'Consolidated 14 disparate cloud telemetry streams into a unified, sub-second autonomous SecOps command surface.',
-    image: '/portfolio2.png',
+    image: `${import.meta.env.BASE_URL}portfolio2.png`,
     alt: 'Autonomous SOC Analytics Dashboard Product Design',
     colSpan: 'md:col-span-1',
   },
@@ -36,7 +36,7 @@ const PORTFOLIO_ITEMS = [
     securityOutcome: '1.4M Req/s Bot Mitigation & 99.998% Global Edge SLA',
     description:
       'Engineered a high-concurrency headless commerce flagship protected by invisible edge behavioral WAF and zero-latency checkout.',
-    image: '/portfolio3.png',
+    image: `${import.meta.env.BASE_URL}portfolio3.png`,
     alt: 'Luxury E-commerce Web Development and Global Edge Perimeter Shield',
     colSpan: 'md:col-span-2',
   },

@@ -20,6 +20,11 @@ function resolveActiveSite(): 'topform' | 'seccloud' {
     if (querySite === 'topform') return 'topform';
     if (querySite === 'seccloud' || querySite === 'evvy') return 'seccloud';
 
+    const path = window.location.pathname.toLowerCase();
+    if (path.includes('evvydigital') || path.includes('seccloud')) {
+      return 'seccloud';
+    }
+
     // Port 5174 (or VITE_SITE=seccloud) serves EvvyDigital // SecCloud
     // Port 5173 serves TOPFORM
     if (window.location.port === '5174') return 'seccloud';

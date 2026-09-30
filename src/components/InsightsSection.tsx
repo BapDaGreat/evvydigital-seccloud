@@ -14,7 +14,7 @@ const INSIGHTS_DATA = [
     readTime: '6 min read',
     excerpt:
       'How spatial depth, liquid-glass translucency, and WCAG 2.1 AA high-contrast tokens reduce SecOps analyst fatigue in mission-critical enterprise dashboards.',
-    image: '/insight1.png',
+    image: `${import.meta.env.BASE_URL}insight1.png`,
     alt: 'Abstract glowing UI illustrating The Future of UI: Beyond Glassmorphism',
   },
   {
@@ -24,7 +24,7 @@ const INSIGHTS_DATA = [
     readTime: '8 min read',
     excerpt:
       'Integrating autonomous anomaly scoring, predictive edge caching, and LLM-assisted threat hunting into cloud-native React and Next.js platforms.',
-    image: '/insight2.png',
+    image: `${import.meta.env.BASE_URL}insight2.png`,
     alt: 'Abstract AI neural network representing Leveraging AI in Web Development',
   },
   {
@@ -34,7 +34,7 @@ const INSIGHTS_DATA = [
     readTime: '5 min read',
     excerpt:
       'Why daylight architectural clarity and precision editorial typography outperform fear-based dark cyber clichés in CISO conversion funnels.',
-    image: '/insight3.png',
+    image: `${import.meta.env.BASE_URL}insight3.png`,
     alt: 'Abstract graphic design exploring Minimalism vs. Maximalism in Branding',
   },
 ];

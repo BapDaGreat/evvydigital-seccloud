@@ -87,7 +87,7 @@ export const StudioSection: React.FC = () => {
         <div className="lg:col-span-6 flex flex-col gap-8">
           <div className="rounded-3xl overflow-hidden border border-white/15 bg-gray-900">
             <img
-              src="/studio1.png"
+              src={`${import.meta.env.BASE_URL}studio1.png`}
               alt="EvvyDigital state-of-the-art studio office interior"
               loading="lazy"
               className="w-full h-72 sm:h-80 object-cover grayscale hover:grayscale-0 transition-all duration-700 ease-out hover:scale-105"
@@ -95,7 +95,7 @@ export const StudioSection: React.FC = () => {
           </div>
           <div className="rounded-3xl overflow-hidden border border-white/15 bg-gray-900">
             <img
-              src="/studio2.png"
+              src={`${import.meta.env.BASE_URL}studio2.png`}
               alt="EvvyDigital collective of designers and security engineers collaborating"
               loading="lazy"
               className="w-full h-72 sm:h-80 object-cover grayscale hover:grayscale-0 transition-all duration-700 ease-out hover:scale-105"

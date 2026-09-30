@@ -2,18 +2,17 @@ import React, { useRef, useCallback } from 'react';
 import { useTactile3D, Tactile3DOptions } from '../hooks/useTactile3D';
 
 interface TactileSurfaceProps extends React.HTMLAttributes<HTMLDivElement>, Tactile3DOptions {
-  /** Optional subtle accent color for the specular sheen ('titanium' | 'blue') */
-  sheenTone?: 'titanium' | 'blue';
+  /** Optional subtle accent color for the specular sheen ('titanium' | 'blue' | 'red' | 'green') */
+  sheenTone?: 'titanium' | 'blue' | 'red' | 'green';
   /** Enable 3D perspective tilt on hover (default false to keep strict architectural grid lines) */
   enableTilt?: boolean;
 }
 
 /**
- * Modular Tactile Surface component.
- * Provides:
- * - Crisp hairline border & multi-layered inner box shadows
- * - Dynamic radial gradient specular sheen tracking pointer coordinates
- * - Optional subtle 3D perspective tilt when enableTilt is true
+ * Floodlit Architectural Plate component.
+ * Built to Impeccable craft-floor + Emil Kowalski design engineering standards:
+ * - Single-elevation hairline border + top-edge specular rim
+ * - Fine-pointer gated radial floodlight sheen
  */
 export const TactileSurface: React.FC<TactileSurfaceProps> = ({
   children,
@@ -30,6 +29,7 @@ export const TactileSurface: React.FC<TactileSurfaceProps> = ({
   const staticRef = useRef<HTMLDivElement | null>(null);
 
   const handleStaticPointerMove = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
+    if (e.pointerType === 'touch') return;
     const el = staticRef.current;
     if (!el) return;
     const rect = el.getBoundingClientRect();
@@ -47,10 +47,14 @@ export const TactileSurface: React.FC<TactileSurfaceProps> = ({
     }
   }, []);
 
-  const sheenGradient =
-    sheenTone === 'blue'
-      ? 'radial-gradient(560px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(105, 224, 250, 0.1), rgba(255, 255, 255, 0.025) 38%, transparent 72%)'
-      : 'radial-gradient(540px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255, 255, 255, 0.075), rgba(212, 212, 216, 0.02) 40%, transparent 72%)';
+  const sheenMap: Record<NonNullable<TactileSurfaceProps['sheenTone']>, string> = {
+    blue: 'radial-gradient(560px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(56, 198, 244, 0.12), rgba(0, 139, 206, 0.035) 42%, transparent 72%)',
+    red: 'radial-gradient(520px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(244, 63, 94, 0.1), rgba(255, 255, 255, 0.02) 42%, transparent 72%)',
+    green:
+      'radial-gradient(520px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(16, 185, 129, 0.1), rgba(255, 255, 255, 0.02) 42%, transparent 72%)',
+    titanium:
+      'radial-gradient(540px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(56, 198, 244, 0.075), rgba(255, 255, 255, 0.02) 42%, transparent 72%)',
+  };
 
   return (
     <div
@@ -58,104 +62,75 @@ export const TactileSurface: React.FC<TactileSurfaceProps> = ({
       onPointerMove={enableTilt ? tilt.handlers.onPointerMove : handleStaticPointerMove}
       onPointerLeave={enableTilt ? tilt.handlers.onPointerLeave : handleStaticPointerLeave}
       style={style}
-      className={`relative tactile-panel transition-colors duration-300 ${className}`}
+      className={`relative overflow-hidden rounded-[12px] tf-surface-plate ${className}`}
       {...rest}
     >
-      {/* Dynamic Specular Sheen (simulates light catching glass / brushed metal) */}
+      {/* Dynamic Specular Sheen */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 z-0 transition-opacity duration-300"
+        className="pointer-events-none absolute inset-0 z-[2]"
         style={{
           opacity: 'var(--sheen-opacity, 0)',
-          background: sheenGradient,
+          background: sheenMap[sheenTone],
+          transition: 'opacity 240ms var(--ease-out)',
         }}
       />
 
-      {/* Top edge brushed-metal rim highlight */}
+      {/* Top edge rim highlight */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 top-0 h-[1px] z-0 transition-opacity duration-300"
+        className="pointer-events-none absolute inset-x-0 top-0 h-[1px] z-[2]"
         style={{
           opacity: 'var(--sheen-opacity, 0)',
           background:
-            'radial-gradient(260px circle at var(--mouse-x, 50%) 0px, rgba(255, 255, 255, 0.35), transparent 100%)',
+            'radial-gradient(280px circle at var(--mouse-x, 50%) 0px, rgba(56, 198, 244, 0.55), transparent 100%)',
+          transition: 'opacity 240ms var(--ease-out)',
         }}
       />
 
-      <div className="relative z-10">{children}</div>
+      <div className="relative z-10 h-full">{children}</div>
     </div>
   );
 };
 
 interface TactileButtonProps extends React.AnchorHTMLAttributes<HTMLAnchorElement> {
-  variant?: 'alabaster' | 'charcoal';
+  variant?: 'blue' | 'charcoal';
 }
 
 /**
- * Tactile CTA link with subtle perspective response and dynamic specular edge catch.
+ * Solid TOPFORM Blue Primary CTA button matching Mark's reference app style:
+ * - Solid #29B6F6 fill, crisp dark #05080D typography, right arrow (→)
+ * - Physical :active scale(0.97) press feedback over 150ms var(--ease-out)
+ * - Touch-safe hover elevation via .tf-btn-primary / .tf-btn-ghost
  */
 export const TactileButton: React.FC<TactileButtonProps> = ({
   children,
   className = '',
-  variant = 'alabaster',
+  variant = 'blue',
   ...rest
 }) => {
-  const { ref, handlers } = useTactile3D<HTMLAnchorElement>({
-    maxTilt: 4,
-    scale: 1.01,
-    damping: 0.15,
-  });
-
   const baseStyles =
-    variant === 'alabaster'
-      ? 'bg-[#f4f4f5] text-[#0c0d0e] hover:bg-[#008BCE] hover:text-[#ffffff] border border-white/20 shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_14px_30px_-10px_rgba(0,0,0,0.75)]'
-      : 'bg-[#141619] text-[#f4f4f5] hover:bg-[#008BCE] hover:border-[#008BCE] border border-white/15 shadow-[inset_0_1px_0_rgba(255,255,255,0.12),0_14px_30px_-10px_rgba(0,0,0,0.8)]';
+    variant === 'blue'
+      ? 'bg-[#29B6F6] text-[#05080d] border border-[#69E0FA]/45 shadow-[inset_0_1px_0_rgba(255,255,255,0.45),0_10px_24px_-8px_rgba(0,139,206,0.45)] tf-btn-primary'
+      : 'bg-[#0b121d] text-[#ffffff] border border-white/15 tf-btn-ghost';
 
   return (
     <a
-      ref={ref}
-      {...handlers}
-      style={{
-        transformStyle: 'preserve-3d',
-        willChange: 'transform',
-      }}
-      className={`relative inline-flex items-center justify-center px-9 py-4 text-xs font-bold tracking-[0.14em] uppercase transition-colors duration-200 ${baseStyles} ${className}`}
+      className={`tf-control relative inline-flex items-center justify-center rounded-[8px] px-7 py-4 text-[13px] font-bold tracking-[0.09em] uppercase ${baseStyles} ${className}`}
       {...rest}
     >
-      <span
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 transition-opacity duration-200"
-        style={{
-          opacity: 'var(--sheen-opacity, 0)',
-          background:
-            'radial-gradient(180px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255, 255, 255, 0.22), transparent 75%)',
-        }}
-      />
-      <span className="relative z-10 inline-flex items-center gap-3">{children}</span>
+      <span className="relative z-10 inline-flex items-center gap-3">
+        <span>{children}</span>
+        <span aria-hidden="true" className="text-base leading-none">
+          &rarr;
+        </span>
+      </span>
     </a>
   );
 };
 
 /**
- * Subtle Analog SVG Grain Overlay (mix-blend-mode: overlay)
+ * Kept as a no-op export for backward compatibility with other components;
+ * Impeccable craft-floor forbids synthetic feTurbulence SVG grain overlays.
  */
-export const AnalogNoiseOverlay: React.FC = () => (
-  <div
-    aria-hidden="true"
-    className="pointer-events-none fixed inset-0 z-40 opacity-[0.032]"
-    style={{ mixBlendMode: 'overlay' }}
-  >
-    <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
-      <filter id="topform-analog-grain">
-        <feTurbulence
-          type="fractalNoise"
-          baseFrequency="0.82"
-          numOctaves="3"
-          stitchTiles="stitch"
-        />
-        <feColorMatrix type="saturate" values="0" />
-      </filter>
-      <rect width="100%" height="100%" filter="url(#topform-analog-grain)" />
-    </svg>
-  </div>
-);
+export const AnalogNoiseOverlay: React.FC = () => null;

@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { TopformSite } from './components/TopformSite';
 import { Navbar } from './components/Navbar';
 import { ScrollIndicator } from './components/ScrollIndicator';
 import { Hero } from './components/Hero';
@@ -12,10 +13,30 @@ import { Footer } from './components/Footer';
 import { DemoModal } from './components/DemoModal';
 import { DesignSpecDrawer } from './components/DesignSpecDrawer';
 
-export function App() {
+function resolveActiveSite(): 'topform' | 'seccloud' {
+  if (typeof window !== 'undefined') {
+    const params = new URLSearchParams(window.location.search);
+    const querySite = params.get('site')?.toLowerCase();
+    if (querySite === 'topform') return 'topform';
+    if (querySite === 'seccloud' || querySite === 'evvy') return 'seccloud';
+
+    // Port 5174 (or VITE_SITE=seccloud) serves EvvyDigital // SecCloud
+    // Port 5173 serves TOPFORM
+    if (window.location.port === '5174') return 'seccloud';
+    if (window.location.port === '5173') return 'topform';
+  }
+
+  const envSite = import.meta.env.VITE_SITE;
+  if (envSite === 'seccloud') return 'seccloud';
+  return 'topform';
+}
+
+export function EvvySecSite() {
   const [demoModalOpen, setDemoModalOpen] = useState(false);
   const [demoPrefillEmail, setDemoPrefillEmail] = useState('');
-  const [demoPrefillTier, setDemoPrefillTier] = useState('Cloud-Native Enterprise');
+  const [demoPrefillTier, setDemoPrefillTier] = useState(
+    'Cloud-Native Enterprise'
+  );
   const [specDrawerOpen, setSpecDrawerOpen] = useState(false);
 
   const handleOpenDemo = (prefillEmail?: string, tier?: string) => {
@@ -25,20 +46,23 @@ export function App() {
   };
 
   return (
-    <div className="relative min-h-screen bg-black text-white selection:bg-[#1676d1] selection:text-white">
-      {/* Global Adaptive Liquid-Glass Navbar */}
+    <div
+      className="relative min-h-screen bg-black text-white selection:bg-[#1676d1] selection:text-white"
+      style={{
+        fontFamily:
+          '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+      }}
+    >
       <Navbar
         onOpenDemo={handleOpenDemo}
         onOpenSpec={() => setSpecDrawerOpen(true)}
       />
 
-      {/* Fixed Left Scroll Progress & Quick-Action Rail */}
       <ScrollIndicator
         onOpenDemo={() => handleOpenDemo()}
         onOpenSpec={() => setSpecDrawerOpen(true)}
       />
 
-      {/* Main Content Landmarks */}
       <main>
         <Hero
           onOpenDemo={handleOpenDemo}
@@ -52,13 +76,11 @@ export function App() {
         <InsightsSection onOpenDemo={handleOpenDemo} />
       </main>
 
-      {/* Scroll-Linked Scale Footer */}
       <Footer
         onOpenDemo={handleOpenDemo}
         onOpenSpec={() => setSpecDrawerOpen(true)}
       />
 
-      {/* Interactive Enterprise Demo Booking Modal (<dialog closedby="any">) */}
       <DemoModal
         isOpen={demoModalOpen}
         onClose={() => setDemoModalOpen(false)}
@@ -66,13 +88,32 @@ export function App() {
         initialTier={demoPrefillTier}
       />
 
-      {/* Senior UX/UI Designer IA & Rationale Blueprint Drawer */}
       <DesignSpecDrawer
         isOpen={specDrawerOpen}
         onClose={() => setSpecDrawerOpen(false)}
       />
     </div>
   );
+}
+
+export function App() {
+  const activeSite = resolveActiveSite();
+
+  useEffect(() => {
+    if (activeSite === 'seccloud') {
+      document.title =
+        'EvvyDigital // SecCloud | Enterprise Cybersecurity SaaS & Digital Platform Architecture';
+    } else {
+      document.title =
+        'TOPFORM | Play Consistently At Your Best. Make Your Best Even Better.';
+    }
+  }, [activeSite]);
+
+  if (activeSite === 'seccloud') {
+    return <EvvySecSite />;
+  }
+
+  return <TopformSite />;
 }
 
 export default App;

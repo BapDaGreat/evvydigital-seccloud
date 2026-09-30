@@ -1,6 +1,21 @@
 @import "tailwindcss";
 
 :root {
+  /* TOPFORM Tokens */
+  --bg-obsidian: #0c0d0e;
+  --bg-charcoal: #111316;
+  --bg-elevated: #15171b;
+  --bg-titanium: #191c20;
+  --text-alabaster: #f4f4f5;
+  --text-titanium: #d4d4d8;
+  --text-zinc: #a1a1aa;
+  --text-muted: #71717a;
+  --border-hairline: rgba(255, 255, 255, 0.07);
+  --border-hairline-strong: rgba(255, 255, 255, 0.14);
+  --topform-blue: #008BCE;
+  --topform-cyan: #69E0FA;
+
+  /* EvvyDigital SecCloud Tokens */
   --primary-blue-deep: #0b4ea8;
   --primary-blue-mid: #1676d1;
   --primary-blue-light: #5fb9ff;
@@ -14,8 +29,8 @@
 
 html {
   scroll-behavior: smooth;
-  background-color: #000000;
-  color: #ffffff;
+  background-color: var(--bg-obsidian);
+  color: var(--text-alabaster);
 }
 
 html,
@@ -25,9 +40,9 @@ body,
   padding: 0;
   width: 100%;
   min-height: 100%;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  background-color: #000000;
-  color: #ffffff;
+  font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background-color: var(--bg-obsidian);
+  color: var(--text-alabaster);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
@@ -47,7 +62,9 @@ li {
   text-wrap: pretty;
 }
 
-/* EvvyDigital Liquid Glassmorphism Utility */
+/* ==========================================================================
+   EVVYDIGITAL SECCLOUD LIQUID GLASSMORPHISM UTILITIES
+   ========================================================================== */
 .liquid-glass {
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.1));
   backdrop-filter: blur(24px);
@@ -64,20 +81,84 @@ li {
   box-shadow: 0 20px 50px -12px rgba(0, 0, 0, 0.45);
 }
 
-/* Native <dialog> backdrop styling per modern-web-guidance */
 dialog::backdrop {
   background-color: rgba(0, 0, 0, 0.72);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
 }
 
+/* ==========================================================================
+   TOPFORM ANALOG DEPTH, HAIRLINE BORDERS & MULTI-LAYERED INNER SHADOWS
+   ========================================================================== */
+.hairline-border {
+  border: 1px solid var(--border-hairline);
+}
+
+.hairline-top {
+  border-top: 1px solid var(--border-hairline);
+}
+
+.hairline-bottom {
+  border-bottom: 1px solid var(--border-hairline);
+}
+
+.tactile-panel {
+  background: linear-gradient(
+    165deg,
+    rgba(255, 255, 255, 0.032) 0%,
+    rgba(255, 255, 255, 0.01) 55%,
+    rgba(0, 0, 0, 0.22) 100%
+  );
+  border: 1px solid var(--border-hairline);
+  box-shadow:
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.08),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.025),
+    inset 0 -1px 0 0 rgba(0, 0, 0, 0.65),
+    0 22px 44px -24px rgba(0, 0, 0, 0.75);
+}
+
+.tactile-panel-Well {
+  background-color: #090a0b;
+  border: 1px solid var(--border-hairline);
+  box-shadow:
+    inset 0 2px 6px rgba(0, 0, 0, 0.8),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+/* ==========================================================================
+   3D PERSPECTIVE TILT & Z-PLANE LAYER UTILITIES
+   ========================================================================== */
+.perspective-1000 {
+  perspective: 1000px;
+}
+
+.preserve-3d {
+  transform-style: preserve-3d;
+}
+
+.translate-z-8 {
+  transform: translateZ(8px);
+}
+
+.translate-z-16 {
+  transform: translateZ(16px);
+}
+
+.translate-z-24 {
+  transform: translateZ(24px);
+}
+
+.translate-z-32 {
+  transform: translateZ(32px);
+}
+
 @media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
+  .preserve-3d,
+  .translate-z-8,
+  .translate-z-16,
+  .translate-z-24,
+  .translate-z-32 {
+    transform: none !important;
+    transition: none !important;
   }
 }

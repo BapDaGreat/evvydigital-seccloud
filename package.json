@@ -4,13 +4,15 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --port 5173",
+    "dev:topform": "vite --port 5173",
+    "dev:seccloud": "vite --port 5174",
     "build": "tsc -b && vite build",
     "preview": "vite preview"
   },
   "dependencies": {
     "@types/three": "^0.186.0",
-    "framer-motion": "^13.4.5",
+    "framer-motion": "^12.38.0",
     "lucide-react": "^0.475.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
